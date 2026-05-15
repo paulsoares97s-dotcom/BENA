@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Bena Gold — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0E1A;
+    --bg-deep: #060912;
+    --bg-card: #0F1424;
+    --bg-card-2: #131932;
+    --bg-card-hover: #161D3A;
+    --border: #1C2342;
+    --border-bright: #2A3458;
+    --border-glow: rgba(255, 215, 0, 0.08);
+    --text: #FFFFFF;
+    --text-dim: #8B92B5;
+    --text-dimmer: #5A6088;
+    --green: #00FF94;
+    --green-glow: rgba(0, 255, 148, 0.15);
+    --red: #FF4757;
+    --red-glow: rgba(255, 71, 87, 0.15);
+    --gold: #FFD700;
+    --gold-soft: #E8C547;
+    --gold-glow: rgba(255, 215, 0, 0.2);
+    --shadow-deep: 0 20px 60px -10px rgba(0, 0, 0, 0.6);
+    --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+    --shadow-glow: 0 0 40px rgba(255, 215, 0, 0.08);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* SF Pro fallback chain pour ressembler à Söhne (typo Stripe) */
+  /* Inter en weight 500-600 imite parfaitement Söhne/Stripe */
+
+  html, body {
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    min-height: 100vh;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse 90% 60% at 50% -10%, rgba(255, 215, 0, 0.07), transparent),
+      radial-gradient(ellipse 70% 40% at 0% 50%, rgba(0, 255, 148, 0.025), transparent),
+      radial-gradient(ellipse 70% 40% at 100% 80%, rgba(255, 71, 87, 0.025), transparent),
+      var(--bg-deep);
+    padding: 32px 18px 50px;
+    padding-top: max(32px, env(safe-area-inset-top));
+    padding-bottom: max(50px, env(safe-area-inset-bottom));
+  }
+
+  .container {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  /* ===== META HEADER (live + date) ===== */
+  .header-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.05s forwards;
+  }
+
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .live-dot-header {
+    width: 7px;
+    height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--green), 0 0 4px var(--green);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .meta-divider {
+    width: 1px;
+    height: 12px;
+    background: var(--border-bright);
+  }
+
+  .header-date {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.9); }
+  }
+
+  /* ===== TITRE PRINCIPAL ===== */
+  .title-section {
+    margin-bottom: 36px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.1s forwards;
+  }
+
+  .title-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .title-main {
+    font-family: 'Instrument Serif', serif;
+    font-size: 38px;
+    line-height: 1.05;
+    font-weight: 400;
+    letter-spacing: -0.8px;
+  }
+
+  .title-main em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  /* ===== 3 CARTES PRINCIPALES ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card {
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px 18px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeUp 0.5s ease forwards;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Highlight subtil sur le bord supérieur (effet verre) */
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  }
+
+  .stat-card.featured {
+    grid-column: 1 / -1;
+    background: linear-gradient(180deg, #131A30 0%, #0F1424 100%);
+    border-color: var(--border-bright);
+    padding: 26px 22px;
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+  }
+
+  .stat-card.featured::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.4), transparent);
+    left: 20%;
+    right: 20%;
+  }
+
+  /* Halo lumineux derrière la carte featured */
+  .stat-card.featured::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 100%;
+    background: radial-gradient(ellipse, rgba(255, 215, 0, 0.06), transparent 70%);
+    pointer-events: none;
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.2s; }
+  .stat-card:nth-child(2) { animation-delay: 0.25s; }
+  .stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stat-live-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  /* ===== TYPO CHIFFRES STYLE STRIPE/REVOLUT ===== */
+  .stat-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.8px;
+    color: var(--text);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'ss01', 'cv11', 'tnum';
+    position: relative;
+    z-index: 1;
+  }
+
+  .stat-card.featured .stat-value {
+    font-size: 48px;
+    font-weight: 600;
+    letter-spacing: -1.5px;
+    background: linear-gradient(180deg, #FFFFFF 30%, var(--gold) 130%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .stat-currency {
+    font-size: 0.55em;
+    color: var(--text-dim);
+    margin-right: 3px;
+    -webkit-text-fill-color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  /* ===== GRAPHIQUE ===== */
+  .chart-card {
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px 18px 18px;
+    margin-bottom: 12px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeUp 0.5s ease 0.4s forwards;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-card);
+  }
+
+  .chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+
+  .chart-title-block {
+    flex: 1;
+  }
+
+  .chart-title {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .chart-tooltip-fixed {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    color: var(--gold);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+
+  .chart-tooltip-date {
+    font-size: 10px;
+    color: var(--text-dimmer);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .chart-status {
+    text-align: right;
+    font-size: 10px;
+    color: var(--text-dimmer);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .chart-svg-wrap {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    touch-action: none;
+  }
+
+  .chart-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .chart-cursor {
+    position: absolute;
+    top: 0;
+    bottom: 22px;
+    width: 1px;
+    background: var(--gold);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    box-shadow: 0 0 8px var(--gold-glow);
+  }
+
+  .chart-cursor.active {
+    opacity: 0.6;
+  }
+
+  .chart-cursor-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--gold);
+    border-radius: 50%;
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 0 14px var(--gold), 0 0 6px var(--gold);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    transform: translate(-50%, -50%);
+  }
+
+  .chart-cursor-dot.active {
+    opacity: 1;
+  }
+
+  .chart-x-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding: 0 4px;
+    font-size: 9px;
+    color: var(--text-dimmer);
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+
+  /* ===== JAUGE OBJECTIF ===== */
+  .objective-card {
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 26px 24px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeUp 0.5s ease 0.5s forwards;
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+  }
+
+  .objective-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
+
+  /* Halo doré subtil */
+  .objective-card::after {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 80%;
+    background: radial-gradient(ellipse, rgba(255, 215, 0, 0.04), transparent 70%);
+    pointer-events: none;
+  }
+
+  .objective-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .objective-title {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .objective-target {
+    font-family: 'Inter', sans-serif;
+    font-size: 22px;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .objective-status {
+    text-align: right;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .status-badge.ahead {
+    background: rgba(0, 255, 148, 0.1);
+    color: var(--green);
+    border: 1px solid rgba(0, 255, 148, 0.25);
+    box-shadow: 0 0 20px rgba(0, 255, 148, 0.12);
+  }
+
+  .status-badge.ontrack {
+    background: rgba(255, 215, 0, 0.1);
+    color: var(--gold);
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+  }
+
+  .status-badge.behind {
+    background: rgba(255, 71, 87, 0.1);
+    color: var(--red);
+    border: 1px solid rgba(255, 71, 87, 0.25);
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.12);
+  }
+
+  .progress-numbers {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .progress-percent {
+    font-family: 'Inter', sans-serif;
+    font-size: 52px;
+    font-weight: 700;
+    letter-spacing: -2.8px;
+    line-height: 1;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-of {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.3px;
+    font-weight: 500;
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    overflow: visible;
+    position: relative;
+    margin-bottom: 18px;
+  }
+
+  /* ===== BARRE DORÉE UNIE ===== */
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 100px;
+    position: relative;
+    transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 12px var(--gold-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .progress-target-marker {
+    position: absolute;
+    top: -5px;
+    bottom: -5px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 8px rgba(255,255,255,0.5);
+    z-index: 2;
+    border-radius: 1px;
+  }
+
+  .progress-target-marker::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid rgba(255,255,255,0.9);
+  }
+
+  .progress-context {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+
+  .progress-context strong {
+    color: var(--text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rhythm-detail {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .rhythm-block .label {
+    color: var(--text-dimmer);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    font-size: 9px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .rhythm-block .value {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.3px;
+  }
+
+  .rhythm-block .value-suffix {
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .rhythm-block.right {
+    text-align: right;
+  }
+
+  /* ===== BLOC FINANCIER ===== */
+  .finance-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeUp 0.5s ease 0.6s forwards;
+  }
+
+  .finance-item {
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+  }
+
+  .finance-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  }
+
+  .finance-label {
+    font-size: 9px;
+    color: var(--text-dimmer);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+
+  .finance-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .finance-value .stat-currency {
+    font-size: 0.6em;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    margin-top: 36px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.5s ease 0.7s forwards;
+  }
+
+  .footer-cycle {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .footer-text {
+    font-size: 9px;
+    color: var(--text-dimmer);
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .footer-refresh {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--text-dim);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: var(--bg-card);
+    transition: all 0.2s;
+    letter-spacing: 0.8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-family: inherit;
+  }
+
+  .footer-refresh:active {
+    transform: scale(0.96);
+    background: var(--bg-card-hover);
+    border-color: var(--border-bright);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 380px) {
+    .progress-percent { font-size: 44px; }
+    .stat-card.featured .stat-value { font-size: 42px; }
+    .title-main { font-size: 32px; }
+  }
+
+  /* ===== AMÉLIORATIONS V5 ===== */
+  
+  
+  /* Effet active sur les cartes */
+  .stat-card, .finance-item, .chart-card, .objective-card {
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  
+  .stat-card:active, .finance-item:active {
+    transform: scale(0.985);
+    border-color: var(--border-bright);
+  }
+  
+  /* Badge LIVE amélioré : style ticker */
+  .live-indicator {
+    background: rgba(0, 255, 148, 0.06);
+    border: 1px solid rgba(0, 255, 148, 0.2);
+    padding: 5px 10px 5px 9px;
+    border-radius: 100px;
+  }
+  
+  /* Meilleur traitement du jour dans la jauge */
+  .day-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    padding: 5px 11px;
+    border-radius: 100px;
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-top: 4px;
+  }
+  
+  .day-pill .sep {
+    color: var(--text-dimmer);
+    font-weight: 400;
+  }
+  
+  /* Tooltip avec jour de la semaine */
+  .tooltip-weekday {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 2px 6px;
+    background: rgba(139, 146, 181, 0.1);
+    border-radius: 4px;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+  }
+  
+  .tooltip-weekday.weekend {
+    background: rgba(255, 71, 87, 0.1);
+    color: var(--red);
+  }
+  
+  /* Tracé animé du graphique */
+  .chart-line-animated {
+    stroke-dasharray: 800;
+    stroke-dashoffset: 800;
+    animation: draw-line 2s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+  }
+  
+  @keyframes draw-line {
+    to { stroke-dashoffset: 0; }
+  }
+  
+  .chart-area-animated {
+    opacity: 0;
+    animation: fade-in 1.5s ease 1.2s forwards;
+  }
+  
+  @keyframes fade-in {
+    to { opacity: 1; }
+  }
+  
+  .chart-current-dot {
+    opacity: 0;
+    animation: fade-in 0.4s ease 2.2s forwards;
+  }
+  
+  /* Bouton actualiser amélioré */
+  .footer-refresh {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .footer-refresh::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+    transition: left 0.6s ease;
+  }
+  
+  .footer-refresh:active::before {
+    left: 100%;
+  }
+  
+  /* Bloc financier : un poil plus présent, plus de respiration */
+  .finance-section {
+    margin-top: 16px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeUp 0.5s ease 0.6s forwards;
+  }
+  
+  .finance-section-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 12px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .finance-section-label::before,
+  .finance-section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 50px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+  }
+  
+  .finance-item {
+    transition: all 0.25s ease;
+  }
+  
+  .finance-item:hover {
+    border-color: var(--border-bright);
+  }
+  
+  .finance-value {
+    font-size: 20px;
+  }
+  
+  /* Mini séparateur entre les sections principales */
+  .section-divider {
+    margin: 6px 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    opacity: 0.5;
+  }
+  
+  /* Style du compteur animé */
+  .counter {
+    display: inline-block;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- META : LIVE + DATE -->
+  <div class="header-meta">
+    <div class="live-indicator">
+      <div class="live-dot-header"></div>
+      LIVE
+    </div>
+    <div class="meta-divider"></div>
+    <div class="header-date" id="header-date">15 MAI 2026</div>
+  </div>
+
+  <!-- TITRE -->
+  <div class="title-section">
+    <div class="title-main">Performance <em>en temps réel</em></div>
+  </div>
+
+  <!-- 3 CARTES PRINCIPALES -->
+  <div class="stats-grid">
+    <div class="stat-card featured">
+      <div class="stat-label">
+        <span class="stat-live-dot"></span>
+        CA AUJOURD'HUI
+      </div>
+      <div class="stat-value">
+        <span id="ca-today">2 340</span><span class="stat-currency"> $</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">CA HIER</div>
+      <div class="stat-value">
+        <span id="ca-yesterday">1 890</span><span class="stat-currency"> $</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">CA CYCLE</div>
+      <div class="stat-value">
+        <span id="ca-cycle">18 720</span><span class="stat-currency"> $</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRAPHIQUE INTERACTIF -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title-block">
+        <div class="chart-title">14 DERNIERS JOURS</div>
+        <div class="chart-tooltip-fixed" id="tooltip-value">2 340 $</div>
+        <div class="chart-tooltip-date" id="tooltip-date">JOUR 4 · 15 MAI</div>
+      </div>
+      <div class="chart-status">CYCLE EN COURS</div>
+    </div>
+    <div class="chart-svg-wrap" id="chart-wrap">
+      <svg class="chart-svg" id="chart-svg" viewBox="0 0 400 160" preserveAspectRatio="none"></svg>
+      <div class="chart-cursor" id="chart-cursor"></div>
+      <div class="chart-cursor-dot" id="chart-cursor-dot"></div>
+    </div>
+    <div class="chart-x-labels" id="x-labels"></div>
+  </div>
+
+  <!-- JAUGE OBJECTIF -->
+  <div class="objective-card">
+    <div class="objective-header">
+      <div>
+        <div class="objective-title">OBJECTIF CYCLE</div>
+        <div class="objective-target">30 000 $</div>
+      </div>
+      <div class="objective-status">
+        <div class="status-badge ahead" id="status-badge">
+          ↑ EN AVANCE
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-numbers">
+      <div class="progress-percent" id="progress-percent">62.4%</div>
+      <div class="progress-of">de l'objectif</div>
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+      <div class="progress-target-marker" id="target-marker" style="left: 13%"></div>
+    </div>
+
+    <div class="progress-context">
+      <div class="day-pill">
+        <span>JOUR <strong id="day-current">4</strong></span>
+        <span class="sep">/</span>
+        <strong id="day-total">31</strong>
+      </div>
+      <div>Devrait être à <strong id="should-be">12.9%</strong></div>
+    </div>
+
+    <div class="rhythm-detail">
+      <div class="rhythm-block">
+        <div class="label">Rythme actuel</div>
+        <div class="value"><span id="rhythm-current">4 680</span><span class="stat-currency"> $</span><span class="value-suffix">/j</span></div>
+      </div>
+      <div class="rhythm-block right">
+        <div class="label">Rythme requis</div>
+        <div class="value"><span id="rhythm-needed">418</span><span class="stat-currency"> $</span><span class="value-suffix">/j</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOC FINANCIER -->
+  <div class="finance-section">
+    <div class="finance-section-label">RÉPARTITION FINANCIÈRE</div>
+    <div class="finance-grid" style="margin-top: 0; opacity: 1; transform: none; animation: none;">
+    <div class="finance-item">
+      <div class="finance-label">Bénéfice projeté</div>
+      <div class="finance-value">
+        <span id="benefit">16 320</span><span class="stat-currency"> $</span>
+      </div>
+    </div>
+    <div class="finance-item">
+      <div class="finance-label">Revenu Lenny</div>
+      <div class="finance-value">
+        <span id="lenny">4 896</span><span class="stat-currency"> $</span>
+      </div>
+    </div>
+    <div class="finance-item">
+      <div class="finance-label">Agence Net</div>
+      <div class="finance-value">
+        <span id="agence">11 424</span><span class="stat-currency"> $</span>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-cycle">CYCLE 12/05 → 12/06</div>
+    <div class="footer-text">MIS À JOUR À <span id="last-update">15:42</span></div>
+    <button class="footer-refresh" onclick="window.location.reload()">
+      ↻ ACTUALISER
+    </button>
+  </div>
+
+</div>
+
+<script>
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+const SHEET_ID = "1f26-1dwzryCXJM-xHmGl_C96DnqGUdgmKdmuKi0NEuo";
+
+// URLs gviz pour chaque onglet (lecture publique, pas de clé API requise)
+function gvizUrl(sheetName) {
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+}
+
+// ============================================================================
+// PARSING GVIZ - Google renvoie du JSON enveloppé dans un callback JS
+// ============================================================================
+async function fetchSheet(sheetName) {
+  const url = gvizUrl(sheetName);
+  const response = await fetch(url);
+  const text = await response.text();
+  // Extraire le JSON entre /*O_o*/google.visualization.Query.setResponse( ... );
+  const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+  return JSON.parse(jsonStr);
+}
+
+// Extraire les valeurs des cellules en respectant les types
+function getRows(data) {
+  if (!data.table || !data.table.rows) return [];
+  return data.table.rows.map(row => {
+    return row.c.map(cell => {
+      if (!cell) return null;
+      // Si la cellule contient une vraie date, parser le format gviz
+      if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('Date(')) {
+        // Format: Date(2026,4,12) -> mois est 0-indexé
+        const match = cell.v.match(/Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)/);
+        if (match) {
+          return new Date(
+            parseInt(match[1]),
+            parseInt(match[2]),
+            parseInt(match[3]),
+            match[4] ? parseInt(match[4]) : 0,
+            match[5] ? parseInt(match[5]) : 0,
+            match[6] ? parseInt(match[6]) : 0
+          );
+        }
+      }
+      return cell.v;
+    });
+  });
+}
+
+// Helper pour parser un nombre (gère null, undefined, strings)
+function num(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') return v;
+  if (typeof v === 'string') {
+    return parseFloat(v.replace(/[^0-9.-]/g, '')) || 0;
+  }
+  return 0;
+}
+
+// Helper pour parser un pourcentage (gère format 0.3 OU 30)
+// Si > 1, on suppose que c'est en format brut (30 au lieu de 0.30) et on divise par 100
+function pct(v) {
+  const n = num(v);
+  if (n > 1) return n / 100;
+  return n;
+}
+
+// Helper pour parser une date depuis Google Sheets (gère Date object et string)
+function parseDate(v) {
+  if (!v) return null;
+  if (v instanceof Date) return v;
+  if (typeof v === 'string') {
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+
+// Comparaison de dates uniquement (sans heure)
+function sameDay(d1, d2) {
+  if (!d1 || !d2) return false;
+  return d1.getFullYear() === d2.getFullYear() &&
+         d1.getMonth() === d2.getMonth() &&
+         d1.getDate() === d2.getDate();
+}
+
+function dateInRange(d, start, end) {
+  if (!d || !start || !end) return false;
+  const ts = d.getTime();
+  return ts >= start.getTime() && ts < end.getTime();
+}
+
+// ============================================================================
+// FORMATTERS
+// ============================================================================
+function formatMoney(n) {
+  return Math.round(n).toLocaleString('fr-FR').replace(/,/g, ' ').replace(/\u202f/g, ' ');
+}
+
+function formatDate(date) {
+  const months = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUI', 'JUI', 'AOÛ', 'SEP', 'OCT', 'NOV', 'DÉC'];
+  return date.getDate() + ' ' + months[date.getMonth()];
+}
+
+function formatPercent(n) {
+  return n.toFixed(1) + '%';
+}
+
+// ============================================================================
+// CHARGEMENT DES DONNÉES
+// ============================================================================
+async function loadAllData() {
+  try {
+    // Charger les 5 onglets nécessaires en parallèle
+    const [params, axi, puprime, abonnements, frais] = await Promise.all([
+      fetchSheet('Parametres'),
+      fetchSheet('Axi'),
+      fetchSheet('PUPrime'),
+      fetchSheet('Abonnements'),
+      fetchSheet('Frais')
+    ]);
+
+    return {
+      params: getRows(params),
+      axi: getRows(axi),
+      puprime: getRows(puprime),
+      abonnements: getRows(abonnements),
+      frais: getRows(frais)
+    };
+  } catch (e) {
+    console.error('Erreur de chargement:', e);
+    throw e;
+  }
+}
+
+// ============================================================================
+// EXTRACTION DES PARAMÈTRES
+// L'onglet Parametres contient :
+// Ligne 3 (index 2 dans rows car header skip) : Objectif en B3
+// Ligne 5 : Début cycle (B5)
+// Ligne 6 : Fin cycle (B6)
+// Ligne 7 : Début cycle précédent (B7)
+// Ligne 9 : Minimum garanti Lenny (B9)
+// Ligne 10 : % Lenny (B10)
+// Ligne 26 : % setter (B26)
+//
+// Note : gviz décale - il faut compter en partant des données utiles
+// ============================================================================
+function getParam(paramsRows, rowNum, colLetter) {
+  // Mapping direct sheet row -> index dans paramsRows (compense parsedNumHeaders=2 de gviz)
+  // Le sheet a parsedNumHeaders=2, donc rows[0] = ligne 3 du sheet, rows[1] = ligne 4, etc.
+  // Donc : ligne sheet N -> index N - 3
+  const colIdx = colLetter.charCodeAt(0) - 'A'.charCodeAt(0);
+  const targetIdx = rowNum - 3;
+  
+  if (targetIdx >= 0 && targetIdx < paramsRows.length) {
+    const row = paramsRows[targetIdx];
+    if (row && row[colIdx] !== null && row[colIdx] !== undefined) {
+      return row[colIdx];
+    }
+  }
+  
+  // Fallback : recherche par label dans la colonne A (plus robuste si l'utilisateur insère des lignes)
+  const labelMap = {
+    3: 'objectif',
+    5: 'début cycle en cours',
+    6: 'fin cycle en cours',
+    7: 'début cycle précédent',
+    9: 'minimum garanti',
+    10: '% sur bénéfice',
+    23: 'montant abonnement',
+    26: '% commission setter'
+  };
+  
+  const targetLabel = labelMap[rowNum];
+  if (targetLabel) {
+    for (const row of paramsRows) {
+      if (row && row[0] && typeof row[0] === 'string') {
+        if (row[0].toLowerCase().includes(targetLabel)) {
+          return row[colIdx];
+        }
+      }
+    }
+  }
+  
+  return null;
+}
+
+// ============================================================================
+// CALCULS PRINCIPAUX
+// ============================================================================
+function computeMetrics(data) {
+  // Date du jour (toujours basée sur le navigateur, plus fiable que le sheet)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Récupérer les paramètres depuis l'onglet Parametres
+  let objective = num(getParam(data.params, 3, 'B')) || 30000;
+  // Sanity : si objectif est aberrant (< 100 ou > 10M), prendre la valeur par défaut
+  if (objective < 100 || objective > 10000000) objective = 30000;
+  const cycleStart = parseDate(getParam(data.params, 5, 'B'));
+  const cycleEnd = parseDate(getParam(data.params, 6, 'B'));
+  const cycleStartPrev = parseDate(getParam(data.params, 7, 'B'));
+  const minLenny = num(getParam(data.params, 9, 'B')) || 500;
+  const pctLenny = pct(getParam(data.params, 10, 'B')) || 0.30;
+
+  // Fallback si les dates ne sont pas lisibles : calcul cycle 12-12
+  let cStart = cycleStart;
+  let cEnd = cycleEnd;
+  let cStartPrev = cycleStartPrev;
+  if (!cStart || !cEnd) {
+    const day = today.getDate();
+    if (day >= 12) {
+      cStart = new Date(today.getFullYear(), today.getMonth(), 12);
+      cEnd = new Date(today.getFullYear(), today.getMonth() + 1, 12);
+    } else {
+      cStart = new Date(today.getFullYear(), today.getMonth() - 1, 12);
+      cEnd = new Date(today.getFullYear(), today.getMonth(), 12);
+    }
+  }
+  if (!cStartPrev) {
+    cStartPrev = new Date(cStart.getFullYear(), cStart.getMonth() - 1, cStart.getDate());
+  }
+
+  // ===== Onglets clients - structure :
+  // Col 0: Date, Col 1: Nom, Col 2: Telegram, Col 3: Setter, Col 4: Dépôt,
+  // Col 5: Dépôt cumulé, Col 6: Redépôt, Col 7: Statut, Col 8: Commission, Col 9: Statut Comm
+  
+  // Trouver l'index de la première ligne de données (skip headers)
+  function findDataStart(rows) {
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      if (row && row[0] instanceof Date) return i;
+    }
+    return 0;
+  }
+
+  function sumBrokerCol(rows, colIdx, dateStart, dateEnd, filterFn) {
+    let total = 0;
+    for (const row of rows) {
+      if (!row || !(row[0] instanceof Date)) continue;
+      if (!dateInRange(row[0], dateStart, dateEnd)) continue;
+      if (filterFn && !filterFn(row)) continue;
+      total += num(row[colIdx]);
+    }
+    return total;
+  }
+
+  function countBrokerClients(rows, dateStart, dateEnd, filterFn) {
+    let count = 0;
+    for (const row of rows) {
+      if (!row || !(row[0] instanceof Date)) continue;
+      if (!dateInRange(row[0], dateStart, dateEnd)) continue;
+      if (filterFn && !filterFn(row)) continue;
+      count++;
+    }
+    return count;
+  }
+
+  function sumByDate(rows, colIdx, targetDate, filterFn) {
+    let total = 0;
+    for (const row of rows) {
+      if (!row || !(row[0] instanceof Date)) continue;
+      if (!sameDay(row[0], targetDate)) continue;
+      if (filterFn && !filterFn(row)) continue;
+      total += num(row[colIdx]);
+    }
+    return total;
+  }
+
+  // ===== CA aujourd'hui et hier =====
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const caToday =
+    sumByDate(data.axi, 8, today) +
+    sumByDate(data.puprime, 8, today) +
+    sumByDate(data.abonnements, 4, today);
+
+  const caYesterday =
+    sumByDate(data.axi, 8, yesterday) +
+    sumByDate(data.puprime, 8, yesterday) +
+    sumByDate(data.abonnements, 4, yesterday);
+
+  // ===== CA cycle en cours (projeté = toutes commissions cycle, indépendant du statut) =====
+  const caCycleAxi = sumBrokerCol(data.axi, 8, cStart, cEnd);
+  const caCyclePU = sumBrokerCol(data.puprime, 8, cStart, cEnd);
+  const caCycleAbo = sumBrokerCol(data.abonnements, 4, cStart, cEnd);
+  const caCycle = caCycleAxi + caCyclePU + caCycleAbo;
+
+  // ===== CA cycle précédent =====
+  const caPrevCycle =
+    sumBrokerCol(data.axi, 8, cStartPrev, cStart) +
+    sumBrokerCol(data.puprime, 8, cStartPrev, cStart) +
+    sumBrokerCol(data.abonnements, 4, cStartPrev, cStart);
+
+  // ===== Frais cycle (uniquement frais classiques de l'onglet Frais, pas setters) =====
+  // Col 0: Date, Col 3: Montant
+  // ATTENTION : à cause des 4 lignes vivantes Lucas/Ibrahim qu'on a ajoutées en haut,
+  // le tableau de frais classique commence plus bas. On filtre uniquement par date dans le cycle.
+  const fraisCycle = sumBrokerCol(data.frais, 3, cStart, cEnd);
+
+  // ===== Bénéfice projeté =====
+  const benefice = caCycle - fraisCycle;
+
+  // ===== Rémunération Lenny =====
+  // Sanity check : si pctLenny est aberrant (> 1), on le clampe à 0.30
+  const safePctLenny = (pctLenny > 0 && pctLenny <= 1) ? pctLenny : 0.30;
+  let lenny = Math.max(minLenny, benefice * safePctLenny);
+  // Sanity : si lenny dépasse le bénéfice (sauf cas du minimum garanti quand bénéfice est faible), c'est une erreur
+  if (benefice > minLenny && lenny > benefice) {
+    lenny = benefice * 0.30;
+  }
+
+  // ===== Agence Net =====
+  const agence = Math.max(0, benefice - lenny);
+
+  // ===== Jours du cycle =====
+  const totalDays = Math.round((cEnd - cStart) / (1000 * 60 * 60 * 24));
+  const currentDay = Math.max(1, Math.round((today - cStart) / (1000 * 60 * 60 * 24)) + 1);
+
+  // ===== Progression =====
+  const progressPct = (caCycle / objective) * 100;
+  const shouldBePct = (currentDay / totalDays) * 100;
+  const diff = progressPct - shouldBePct;
+
+  let statusClass, statusText;
+  if (diff > 5) {
+    statusClass = 'ahead';
+    statusText = '↑ EN AVANCE ' + Math.round(diff) + '%';
+  } else if (diff < -5) {
+    statusClass = 'behind';
+    statusText = '↓ EN RETARD ' + Math.round(Math.abs(diff)) + '%';
+  } else {
+    statusClass = 'ontrack';
+    statusText = '→ DANS LES TEMPS';
+  }
+
+  // ===== Rythmes =====
+  const rhythmCurrent = caCycle / currentDay;
+  const daysRemaining = Math.max(1, totalDays - currentDay);
+  const rhythmNeeded = Math.max(0, (objective - caCycle) / daysRemaining);
+
+  // ===== Données par jour pour le graphique (14 derniers jours écoulés) =====
+  const allCycleDays = [];
+  for (let i = 0; i < currentDay; i++) {
+    const day = new Date(cStart);
+    day.setDate(day.getDate() + i);
+    day.setHours(0, 0, 0, 0);
+    const ca =
+      sumByDate(data.axi, 8, day) +
+      sumByDate(data.puprime, 8, day) +
+      sumByDate(data.abonnements, 4, day);
+    const dow = day.getDay();
+    allCycleDays.push({
+      dayNum: i + 1,
+      date: day,
+      ca: ca,
+      isWeekend: (dow === 0 || dow === 6)
+    });
+  }
+  // Garder uniquement les 14 derniers
+  const chartDays = allCycleDays.slice(-14);
+
+  // Format pour affichage cycle
+  function formatCycleLabel(d) {
+    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+  const cycleLabel = 'CYCLE ' + formatCycleLabel(cStart) + ' → ' + formatCycleLabel(cEnd);
+
+  return {
+    today, cStart, cEnd, objective,
+    caToday, caYesterday, caCycle, caPrevCycle,
+    fraisCycle, benefice, lenny, agence,
+    totalDays, currentDay,
+    progressPct, shouldBePct,
+    statusClass, statusText,
+    rhythmCurrent, rhythmNeeded,
+    chartDays,
+    cycleLabel
+  };
+}
+
+// ============================================================================
+// ANIMATION DES CHIFFRES (count-up)
+// ============================================================================
+function animateNumber(el, target, duration, formatter) {
+  if (!el) return;
+  duration = duration || 1400;
+  formatter = formatter || formatMoney;
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = target * eased;
+    el.textContent = formatter(current);
+    if (progress < 1) requestAnimationFrame(tick);
+    else el.textContent = formatter(target);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ============================================================================
+// RENDU UI
+// ============================================================================
+let metrics; // global pour le graphique interactif
+
+function renderUI(m) {
+  metrics = m;
+
+  // Header date
+  const monthNames = ['JANV', 'FÉVR', 'MARS', 'AVRIL', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEPT', 'OCT', 'NOV', 'DÉC'];
+  document.getElementById('header-date').textContent =
+    m.today.getDate() + ' ' + monthNames[m.today.getMonth()] + ' ' + m.today.getFullYear();
+
+  // Cycle label dans le footer
+  document.querySelector('.footer-cycle').textContent = m.cycleLabel;
+
+  // KPIs principaux avec animation
+  setTimeout(() => {
+    animateNumber(document.getElementById('ca-today'), m.caToday);
+    animateNumber(document.getElementById('ca-yesterday'), m.caYesterday);
+    animateNumber(document.getElementById('ca-cycle'), m.caCycle);
+    animateNumber(document.getElementById('progress-percent'), m.progressPct, 1400, formatPercent);
+    animateNumber(document.getElementById('benefit'), m.benefice);
+    animateNumber(document.getElementById('lenny'), m.lenny);
+    animateNumber(document.getElementById('agence'), m.agence);
+    animateNumber(document.getElementById('rhythm-current'), m.rhythmCurrent);
+    animateNumber(document.getElementById('rhythm-needed'), m.rhythmNeeded);
+  }, 200);
+
+  document.getElementById('day-current').textContent = m.currentDay;
+  document.getElementById('day-total').textContent = m.totalDays;
+  document.getElementById('should-be').textContent = m.shouldBePct.toFixed(1) + '%';
+
+  // Statut
+  const statusEl = document.getElementById('status-badge');
+  statusEl.className = 'status-badge ' + m.statusClass;
+  statusEl.textContent = m.statusText;
+
+  // Barre de progression + marker
+  setTimeout(() => {
+    document.getElementById('progress-fill').style.width = Math.min(m.progressPct, 100) + '%';
+    document.getElementById('target-marker').style.left = Math.min(m.shouldBePct, 100) + '%';
+  }, 300);
+
+  // Graphique
+  renderChart(m.chartDays, m);
+
+  // Heure de mise à jour
+  const now = new Date();
+  document.getElementById('last-update').textContent =
+    String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+}
+
+// ============================================================================
+// GRAPHIQUE
+// ============================================================================
+function renderChart(chartDays, m) {
+  const svg = document.getElementById('chart-svg');
+  const chartWrap = document.getElementById('chart-wrap');
+  const cursor = document.getElementById('chart-cursor');
+  const cursorDot = document.getElementById('chart-cursor-dot');
+  const tooltipValue = document.getElementById('tooltip-value');
+  const tooltipDate = document.getElementById('tooltip-date');
+
+  const svgWidth = 400;
+  const svgHeight = 160;
+  const padding = { top: 18, right: 8, bottom: 5, left: 8 };
+
+  if (chartDays.length === 0) {
+    svg.innerHTML = '';
+    tooltipValue.textContent = formatMoney(m.caToday) + ' $';
+    tooltipDate.innerHTML = '—';
+    return;
+  }
+
+  const maxValue = Math.max(...chartDays.map(d => d.ca), 100);
+
+  function xScale(i) {
+    return padding.left + (i / Math.max(chartDays.length - 1, 1)) * (svgWidth - padding.left - padding.right);
+  }
+  function yScale(v) {
+    return svgHeight - padding.bottom - (v / maxValue) * (svgHeight - padding.top - padding.bottom);
+  }
+
+  let linePath = '';
+  chartDays.forEach((d, i) => {
+    const x = xScale(i);
+    const y = yScale(d.ca);
+    linePath += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+  });
+
+  let areaPath = linePath;
+  if (chartDays.length > 0) {
+    const lastX = xScale(chartDays.length - 1);
+    const firstX = xScale(0);
+    areaPath += ` L ${lastX} ${svgHeight - padding.bottom} L ${firstX} ${svgHeight - padding.bottom} Z`;
+  }
+
+  let currentDot = '';
+  if (chartDays.length > 0) {
+    const lastIdx = chartDays.length - 1;
+    const x = xScale(lastIdx);
+    const y = yScale(chartDays[lastIdx].ca);
+    currentDot = `
+      <circle cx="${x}" cy="${y}" r="10" fill="#FFD700" fill-opacity="0.15"/>
+      <circle cx="${x}" cy="${y}" r="4.5" fill="#FFD700" stroke="#0F1424" stroke-width="2"/>
+    `;
+  }
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="gradient-area" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#FFD700" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path class="chart-area-animated" d="${areaPath}" fill="url(#gradient-area)"/>
+    <path class="chart-line-animated" d="${linePath}" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 6px rgba(255,215,0,0.4))"/>
+    <g class="chart-current-dot">${currentDot}</g>
+  `;
+
+  // X labels
+  const xLabelsContainer = document.getElementById('x-labels');
+  xLabelsContainer.innerHTML = '';
+  const numLabels = Math.min(4, chartDays.length);
+  if (numLabels >= 2) {
+    const labelIndices = [];
+    for (let i = 0; i < numLabels; i++) {
+      labelIndices.push(Math.round(i * (chartDays.length - 1) / (numLabels - 1)));
+    }
+    labelIndices.forEach(idx => {
+      const span = document.createElement('span');
+      span.textContent = 'J' + chartDays[idx].dayNum;
+      xLabelsContainer.appendChild(span);
+    });
+  } else if (chartDays.length === 1) {
+    const span = document.createElement('span');
+    span.textContent = 'J' + chartDays[0].dayNum;
+    span.style.margin = '0 auto';
+    xLabelsContainer.appendChild(span);
+  }
+
+  // Interactivité
+  function handlePointer(clientX) {
+    const rect = chartWrap.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const relX = Math.max(0, Math.min(1, x / rect.width));
+    const dayIdx = Math.round(relX * (chartDays.length - 1));
+    const clampedIdx = Math.max(0, Math.min(chartDays.length - 1, dayIdx));
+    const day = chartDays[clampedIdx];
+    if (!day) return;
+
+    const svgX = (xScale(clampedIdx) / svgWidth) * rect.width;
+    cursor.style.left = svgX + 'px';
+    cursor.classList.add('active');
+
+    const svgY = (yScale(day.ca) / svgHeight) * rect.height;
+    cursorDot.style.left = svgX + 'px';
+    cursorDot.style.top = svgY + 'px';
+    cursorDot.classList.add('active');
+
+    tooltipValue.textContent = formatMoney(day.ca) + ' $';
+    const weekdays = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
+    const wd = weekdays[day.date.getDay()];
+    const wdClass = day.isWeekend ? 'tooltip-weekday weekend' : 'tooltip-weekday';
+    tooltipDate.innerHTML = `<span class="${wdClass}">${wd}</span>JOUR ${day.dayNum} · ${formatDate(day.date)}`;
+    tooltipValue.style.color = '#FFD700';
+  }
+
+  function resetTooltip() {
+    cursor.classList.remove('active');
+    cursorDot.classList.remove('active');
+    tooltipValue.textContent = formatMoney(m.caToday) + ' $';
+    tooltipValue.style.color = '#FFD700';
+    const weekdays = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
+    const wd = weekdays[m.today.getDay()];
+    const isWE = (m.today.getDay() === 0 || m.today.getDay() === 6);
+    const wdClass = isWE ? 'tooltip-weekday weekend' : 'tooltip-weekday';
+    tooltipDate.innerHTML = `<span class="${wdClass}">${wd}</span>JOUR ${m.currentDay} · ${formatDate(m.today)}`;
+  }
+
+  // Attacher les listeners directement (pas de cloneNode qui casse les références)
+  // Si déjà attachés, c'est ok car renderChart n'est appelé qu'une fois par chargement
+  chartWrap.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handlePointer(e.touches[0].clientX);
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(5);
+    }
+  }, { passive: false });
+  chartWrap.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    handlePointer(e.touches[0].clientX);
+  }, { passive: false });
+  chartWrap.addEventListener('touchend', () => {
+    setTimeout(resetTooltip, 1500);
+  });
+  chartWrap.addEventListener('mousemove', (e) => handlePointer(e.clientX));
+  chartWrap.addEventListener('mouseleave', resetTooltip);
+
+  // Init tooltip avec aujourd'hui
+  resetTooltip();
+}
+
+// ============================================================================
+// ÉTAT DE CHARGEMENT
+// ============================================================================
+function showLoading() {
+  const container = document.querySelector('.container');
+  container.style.opacity = '0.3';
+  container.style.transition = 'opacity 0.3s';
+}
+
+function hideLoading() {
+  const container = document.querySelector('.container');
+  container.style.opacity = '1';
+}
+
+function showError(err) {
+  document.body.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;color:#FFFFFF;font-family:Inter,sans-serif;">
+      <div style="font-size:14px;color:#FF4757;letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:16px;">ERREUR</div>
+      <div style="font-size:16px;color:#8B92B5;margin-bottom:24px;max-width:380px;line-height:1.5;">Impossible de charger les données du dashboard. Vérifie ta connexion internet et que le Google Sheets est bien publié.</div>
+      <button onclick="window.location.reload()" style="padding:12px 24px;border:1px solid #2A3458;border-radius:100px;background:#0F1424;color:#FFFFFF;font-family:Inter,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:500;cursor:pointer;">↻ Réessayer</button>
+      <div style="margin-top:32px;font-size:10px;color:#5A6088;font-family:monospace;">${err && err.message ? err.message : 'Erreur inconnue'}</div>
+    </div>
+  `;
+}
+
+// ============================================================================
+// INIT
+// ============================================================================
+(async function init() {
+  try {
+    showLoading();
+    const data = await loadAllData();
+    const m = computeMetrics(data);
+    hideLoading();
+    renderUI(m);
+  } catch (e) {
+    console.error(e);
+    showError(e);
+  }
+})();
+
+</script>
+
+</body>
+</html>
