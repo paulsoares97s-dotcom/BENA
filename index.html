@@ -1104,6 +1104,8 @@
     color: var(--text-dimmer);
     cursor: pointer;
   }
+  .stat-prev { margin-top: 9px; font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--text-dimmer); }
+  .stat-prev b { color: var(--gold); font-weight: 800; }
 </style>
 </head>
 <body>
@@ -1163,6 +1165,7 @@
       <div class="stat-value">
         <span id="ca-cycle" class="sk">18 720</span><span class="stat-currency"> $</span>
       </div>
+      <div class="stat-prev">Cycle précédent · <b id="ca-prev">—</b> $</div>
     </div>
   </div>
 
@@ -1349,22 +1352,26 @@
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
-const SHEET_ID = "1f26-1dwzryCXJM-xHmGl_C96DnqGUdgmKdmuKi0NEuo";
+const SHEET_ID = "1TiKf5yQxE26ftnRD5c-CeAy8974i7_fFN0dNZdSw4po";
 const AUTO_REFRESH_MS = 60000;
 const CACHE_KEY = 'bena_cache_v1';
 
 function gvizUrl(sheetName) {
-  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=0&sheet=${encodeURIComponent(sheetName)}`;
 }
 
 // ============================================================================
 // PARSING GVIZ
 // ============================================================================
 async function fetchSheet(sheetName) {
-  const response = await fetch(gvizUrl(sheetName), { cache: 'no-store' });
-  const text = await response.text();
-  const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-  return JSON.parse(jsonStr);
+  try {
+    const response = await fetch(gvizUrl(sheetName), { cache: 'no-store' });
+    const text = await response.text();
+    const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    return { table: { rows: [] } };
+  }
 }
 
 function getRows(data) {
@@ -1444,18 +1451,21 @@ function formatPercent(n) {
 // CHARGEMENT
 // ============================================================================
 async function loadAllData() {
-  const [params, axi, puprime, abonnements, frais] = await Promise.all([
-    fetchSheet('Parametres'),
+  const [params, dash, axi, puprime, raisefx, frais] = await Promise.all([
+    fetchSheet('Paramètres'),
+    fetchSheet('Dashboard'),
     fetchSheet('Axi'),
     fetchSheet('PUPrime'),
-    fetchSheet('Abonnements'),
+    fetchSheet('RaiseFX'),
     fetchSheet('Frais')
   ]);
   return {
     params: getRows(params),
+    dash: getRows(dash),
     axi: getRows(axi),
     puprime: getRows(puprime),
-    abonnements: getRows(abonnements),
+    raisefx: getRows(raisefx),
+    abonnements: [],
     frais: getRows(frais)
   };
 }
@@ -1505,13 +1515,21 @@ function computeMetrics(data) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  let objective = num(getParam(data.params, 3, 'B')) || 30000;
+  const P = data.params || [];
+  const pB = (sheetRow) => { const r = P[sheetRow - 1]; return r ? r[1] : null; };
+  const pByLabel = (sub) => { for (const r of P) { if (r && typeof r[0] === 'string' && r[0].toLowerCase().includes(sub)) return r[1]; } return null; };
+  let objective = num(pB(23)) || num(pByLabel('objectif période')) || num(pByLabel('objectif')) || 30000;
   if (objective < 100 || objective > 10000000) objective = 30000;
-  const cycleStart = parseDate(getParam(data.params, 5, 'B'));
-  const cycleEnd = parseDate(getParam(data.params, 6, 'B'));
-  const cycleStartPrev = parseDate(getParam(data.params, 7, 'B'));
-  const minLenny = num(getParam(data.params, 9, 'B')) || 500;
-  const pctLenny = pct(getParam(data.params, 10, 'B')) || 0.30;
+  const cycleStart = parseDate(pB(20)) || parseDate(pByLabel('début période'));
+  const cycleEnd = parseDate(pB(21)) || parseDate(pByLabel('fin période'));
+  const cycleStartPrev = null;
+  const minLenny = num(pB(11)) || num(pByLabel('minimum garanti')) || 500;
+  const pctLenny = pct(pB(10)) || pct(pByLabel('sur bénéfice')) || 0.30;
+
+  // Agrégats exacts lus depuis le moteur du Dashboard (col G) : frais/bénéfice/Lenny/agence
+  const D = data.dash || [];
+  const dG = (sheetRow) => { const r = D[sheetRow - 1]; const v = r ? r[6] : null; return (v === null || v === undefined || v === '') ? null : num(v); };
+  const fraisFromDash = dG(57), beneFromDash = dG(58), lennyFromDash = dG(59), ageFromDash = dG(60);
 
   let cStart = cycleStart;
   let cEnd = cycleEnd;
@@ -1558,32 +1576,53 @@ function computeMetrics(data) {
   const caToday =
     sumByDate(data.axi, 8, today) +
     sumByDate(data.puprime, 8, today) +
-    sumByDate(data.abonnements, 4, today);
+    sumByDate(data.abonnements, 4, today) + sumByDate(data.raisefx, 8, today);
 
   const caYesterday =
     sumByDate(data.axi, 8, yesterday) +
     sumByDate(data.puprime, 8, yesterday) +
-    sumByDate(data.abonnements, 4, yesterday);
+    sumByDate(data.abonnements, 4, yesterday) + sumByDate(data.raisefx, 8, yesterday);
 
   const caDayBefore =
     sumByDate(data.axi, 8, dayBefore) +
     sumByDate(data.puprime, 8, dayBefore) +
-    sumByDate(data.abonnements, 4, dayBefore);
+    sumByDate(data.abonnements, 4, dayBefore) + sumByDate(data.raisefx, 8, dayBefore);
 
   const caCycleAxi = sumBrokerCol(data.axi, 8, cStart, cEnd);
   const caCyclePU = sumBrokerCol(data.puprime, 8, cStart, cEnd);
+  const caCycleRaise = sumBrokerCol(data.raisefx, 8, cStart, cEnd);
   const caCycleAbo = sumBrokerCol(data.abonnements, 4, cStart, cEnd);
-  const caCycle = caCycleAxi + caCyclePU + caCycleAbo;
+  const caCycle = caCycleAxi + caCyclePU + caCycleRaise + caCycleAbo;
 
-  const fraisCycle = sumBrokerCol(data.frais, 3, cStart, cEnd);
-  const benefice = caCycle - fraisCycle;
+  // --- Cycle précédent (total projeté) : gère mensuel->bimensuel + fins de mois variables (31/30/28) ---
+  const basculeDate = parseDate(pB(6)) || new Date(2026, 7, 1);
+  let prevCA = 0;
+  if (cStart) {
+    const prevEnd = new Date(cStart.getFullYear(), cStart.getMonth(), cStart.getDate() - 1); // veille du début => fin de mois auto
+    let prevStart;
+    if (prevEnd < basculeDate) {
+      prevStart = new Date(prevEnd.getFullYear(), prevEnd.getMonth(), 1);        // ere mensuelle : mois complet
+    } else if (prevEnd.getDate() <= 15) {
+      prevStart = new Date(prevEnd.getFullYear(), prevEnd.getMonth(), 1);        // periode precedente = P1 [1->15]
+    } else {
+      prevStart = new Date(prevEnd.getFullYear(), prevEnd.getMonth(), 16);       // periode precedente = P2 [16->fin]
+    }
+    prevCA = sumBrokerCol(data.axi, 8, prevStart, prevEnd)
+           + sumBrokerCol(data.puprime, 8, prevStart, prevEnd)
+           + sumBrokerCol(data.raisefx, 8, prevStart, prevEnd);
+  }
+
+  const fraisCycle = (fraisFromDash !== null) ? fraisFromDash : sumBrokerCol(data.frais, 3, cStart, cEnd);
+  const benefice = (beneFromDash !== null) ? beneFromDash : (caCycle - fraisCycle);
 
   const safePctLenny = (pctLenny > 0 && pctLenny <= 1) ? pctLenny : 0.30;
-  let lenny = Math.max(minLenny, benefice * safePctLenny);
-  if (benefice > minLenny && lenny > benefice) {
-    lenny = benefice * 0.30;
+  let lenny;
+  if (lennyFromDash !== null) { lenny = lennyFromDash; }
+  else {
+    lenny = Math.max(minLenny, benefice * safePctLenny);
+    if (benefice > minLenny && lenny > benefice) lenny = benefice * 0.30;
   }
-  const agence = Math.max(0, benefice - lenny);
+  const agence = (ageFromDash !== null) ? ageFromDash : Math.max(0, benefice - lenny);
 
   const totalDays = Math.round((cEnd - cStart) / (1000 * 60 * 60 * 24));
   const currentDay = Math.max(1, Math.round((today - cStart) / (1000 * 60 * 60 * 24)) + 1);
@@ -1621,6 +1660,7 @@ function computeMetrics(data) {
     const ca =
       sumByDate(data.axi, 8, day) +
       sumByDate(data.puprime, 8, day) +
+      sumByDate(data.raisefx, 8, day) +
       sumByDate(data.abonnements, 4, day);
     const dow = day.getDay();
     allCycleDays.push({
@@ -1643,7 +1683,7 @@ function computeMetrics(data) {
     for (const row of rows) {
       if (!row || !(row[0] instanceof Date)) continue;
       if (!dateInRange(row[0], cStart, cEnd)) continue;
-      const dep = num(row[4]);
+      const dep = num(row[5]);
       const com = num(row[8]);
       if (dep <= 0 && com <= 0) continue;
       deposits.push({
@@ -1657,6 +1697,7 @@ function computeMetrics(data) {
   }
   collectDeposits(data.axi, 'Axi');
   collectDeposits(data.puprime, 'PUPrime');
+  collectDeposits(data.raisefx, 'RaiseFX');
   deposits.sort((a, b) => b.date - a.date);
   const recentDeposits = deposits.slice(0, 5);
 
@@ -1677,7 +1718,8 @@ function computeMetrics(data) {
     chartDays, bestDay,
     recentDeposits,
     allDeposits: deposits,
-    cycleLabel
+    cycleLabel,
+    prevCA
   };
 }
 
@@ -1891,6 +1933,8 @@ function renderUI(m, soft) {
   animateNumber(document.getElementById('ca-today'), m.caToday, dur);
   animateNumber(document.getElementById('ca-yesterday'), m.caYesterday, dur);
   animateNumber(document.getElementById('ca-cycle'), m.caCycle, dur);
+  var _prevEl = document.getElementById('ca-prev');
+  if (_prevEl) animateNumber(_prevEl, m.prevCA, dur);
   animateNumber(document.getElementById('progress-percent'), m.progressPct, dur, formatPercent);
   animateNumber(document.getElementById('benefit'), m.benefice, dur);
   animateNumber(document.getElementById('lenny'), m.lenny, dur);
