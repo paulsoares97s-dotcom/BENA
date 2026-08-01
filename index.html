@@ -1531,22 +1531,20 @@ function computeMetrics(data) {
   const dG = (sheetRow) => { const r = D[sheetRow - 1]; const v = r ? r[6] : null; return (v === null || v === undefined || v === '') ? null : num(v); };
   const fraisFromDash = dG(57), beneFromDash = dG(58), lennyFromDash = dG(59), ageFromDash = dG(60);
 
-  let cStart = cycleStart;
-  let cEnd = cycleEnd;
-  let cStartPrev = cycleStartPrev;
-  if (!cStart || !cEnd) {
-    const day = today.getDate();
-    if (day >= 12) {
-      cStart = new Date(today.getFullYear(), today.getMonth(), 12);
-      cEnd = new Date(today.getFullYear(), today.getMonth() + 1, 12);
-    } else {
-      cStart = new Date(today.getFullYear(), today.getMonth() - 1, 12);
-      cEnd = new Date(today.getFullYear(), today.getMonth(), 12);
-    }
+  // --- Période active recalculée par l'app (fiable) : mensuel jusqu'au 31/07, bimensuel au 01/08, fins de mois auto (30/31/28) ---
+  const bascule = parseDate(pB(6)) || new Date(2026, 7, 1); // 1er août 2026
+  const _cy = today.getFullYear(), _cmo = today.getMonth(), _cday = today.getDate();
+  let cStart, cEnd;
+  if (today < bascule) {
+    cStart = new Date(_cy, _cmo, 1);   cEnd = new Date(_cy, _cmo + 1, 0);  objective = 30000; // cycle mensuel (transition)
+  } else if (_cday <= 15) {
+    cStart = new Date(_cy, _cmo, 1);   cEnd = new Date(_cy, _cmo, 15);     objective = 15000; // P1 : 1 -> 15
+  } else {
+    cStart = new Date(_cy, _cmo, 16);  cEnd = new Date(_cy, _cmo + 1, 0);  objective = 15000; // P2 : 16 -> fin de mois
   }
-  if (!cStartPrev) {
-    cStartPrev = new Date(cStart.getFullYear(), cStart.getMonth() - 1, cStart.getDate());
-  }
+  cStart.setHours(0, 0, 0, 0);
+  cEnd.setHours(23, 59, 59, 999); // borne de fin INCLUSIVE (corrige l'ancien decalage)
+  let cStartPrev = new Date(cStart.getFullYear(), cStart.getMonth() - 1, cStart.getDate());
 
   function sumBrokerCol(rows, colIdx, dateStart, dateEnd) {
     let total = 0;
