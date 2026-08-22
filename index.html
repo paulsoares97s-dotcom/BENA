@@ -1246,7 +1246,7 @@
         </div>
       </div>
       <div class="finance-item">
-        <div class="finance-label">Revenu Lenny</div>
+        <div class="finance-label" id="label-revenu-partenaire">Revenu Lenny</div>
         <div class="finance-value">
           <span id="lenny" class="sk">4 896</span><span class="stat-currency"> $</span>
         </div>
@@ -1352,12 +1352,42 @@
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
-const SHEET_ID = "1TiKf5yQxE26ftnRD5c-CeAy8974i7_fFN0dNZdSw4po";
+const REGISTRY_SHEET_ID = "1GYRZXUad1IGMf04IfeSteZl0cOEcTdwXOjb83Fi51bY";
+let SHEET_ID = "1TiKf5yQxE26ftnRD5c-CeAy8974i7_fFN0dNZdSw4po"; // défaut = Lenny, tant que aucun ?p= valide n'est fourni
+let PARTNER_NAME = "Lenny";
 const AUTO_REFRESH_MS = 60000;
 const CACHE_KEY = 'bena_cache_v1';
 
-function gvizUrl(sheetName) {
-  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=0&sheet=${encodeURIComponent(sheetName)}`;
+function gvizUrl(sheetName, sheetId) {
+  return `https://docs.google.com/spreadsheets/d/${sheetId || SHEET_ID}/gviz/tq?tqx=out:json&headers=0&sheet=${encodeURIComponent(sheetName)}`;
+}
+
+// ============================================================================
+// RÉSOLUTION PARTENAIRE — via ?p=<token> sur le Registre Partenaires
+// ============================================================================
+async function resolvePartner() {
+  const token = new URLSearchParams(location.search).get('p');
+  if (!token) return; // pas de token -> reste sur le partenaire par défaut (Lenny)
+  try {
+    const response = await fetch(
+      `https://docs.google.com/spreadsheets/d/${REGISTRY_SHEET_ID}/gviz/tq?tqx=out:json&headers=1`,
+      { cache: 'no-store' }
+    );
+    const text = await response.text();
+    const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+    const data = JSON.parse(jsonStr);
+    const rows = (data.table && data.table.rows) || [];
+    const match = rows.find(row => row.c && row.c[2] && row.c[2].v === token);
+    if (match && match.c[5] && match.c[5].v === 'actif') {
+      SHEET_ID = match.c[3].v;
+      PARTNER_NAME = match.c[1].v || PARTNER_NAME;
+      document.title = PARTNER_NAME + ' — Dashboard';
+      const revenuLabel = document.getElementById('label-revenu-partenaire');
+      if (revenuLabel) revenuLabel.textContent = 'Revenu ' + PARTNER_NAME;
+    }
+  } catch (e) {
+    // en cas d'échec, on reste sur le partenaire par défaut
+  }
 }
 
 // ============================================================================
@@ -1898,7 +1928,7 @@ function renderCycle(m) {
     '<div class="cascade-row total"><span>CA du cycle</span><strong>' + formatMoney(m.caCycle) + ' $</strong></div>'
     + '<div class="cascade-row"><span>− Frais</span><strong>−' + formatMoney(m.fraisCycle) + ' $</strong></div>'
     + '<div class="cascade-row"><span>= Bénéfice</span><strong>' + formatMoney(m.benefice) + ' $</strong></div>'
-    + '<div class="cascade-row"><span>− Part Lenny</span><strong>−' + formatMoney(m.lenny) + ' $</strong></div>'
+    + '<div class="cascade-row"><span>− Part ' + PARTNER_NAME + '</span><strong>−' + formatMoney(m.lenny) + ' $</strong></div>'
     + '<div class="cascade-row final"><span>= Agence Net</span><strong>' + formatMoney(m.agence) + ' $</strong></div>';
 }
 
@@ -2309,7 +2339,10 @@ document.addEventListener('visibilitychange', () => {
 // INIT
 // ============================================================================
 document.getElementById('app').classList.add('loading');
-refresh(false);
+(async () => {
+  await resolvePartner();
+  refresh(false);
+})();
 </script>
 
 </body>

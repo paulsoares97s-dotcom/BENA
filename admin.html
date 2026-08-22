@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incubeo — Vue Portefeuille</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #04070F;
+    --bg-card: #0F1424;
+    --bg-card-2: #131932;
+    --border: #1C2342;
+    --border-bright: #2A3458;
+    --text: #FFFFFF;
+    --text-dim: #8B92B5;
+    --text-dimmer: #5A6088;
+    --green: #00FF94;
+    --red: #FF4757;
+    --gold: #FFD700;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+  }
+  body { padding: 32px 18px 60px; }
+  .container { max-width: 720px; margin: 0 auto; }
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+  .sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    letter-spacing: 0.3px;
+  }
+  .totals-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .total-card {
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .total-label {
+    font-size: 9px;
+    color: var(--text-dimmer);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .total-value {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .total-value.gold { color: var(--gold); }
+  .total-value.green { color: var(--green); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dimmer);
+    font-weight: 600;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; }
+  .partner-name { font-weight: 600; }
+  .alert {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.3px;
+  }
+  .lock {
+    max-width: 340px;
+    margin: 120px auto;
+    text-align: center;
+  }
+  .lock input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    font-size: 15px;
+    margin: 16px 0 10px;
+    text-align: center;
+    font-family: inherit;
+  }
+  .lock button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--gold);
+    color: #060912;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .lock .err { color: var(--red); font-size: 12px; margin-top: 10px; min-height: 16px; }
+  .empty { padding: 24px; text-align: center; color: var(--text-dimmer); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="lock" id="lock-screen">
+  <h1>Vue Portefeuille</h1>
+  <div class="sub">Accès équipe uniquement</div>
+  <input type="password" id="lock-pass" placeholder="Mot de passe">
+  <button onclick="tryUnlock()">Entrer</button>
+  <div class="err" id="lock-err"></div>
+</div>
+
+<div class="container" id="app" style="display:none;">
+  <h1>Vue Portefeuille — Incubeo</h1>
+  <div class="sub">Agrégat de tous les partenaires actifs, cycle en cours</div>
+
+  <div class="totals-grid">
+    <div class="total-card">
+      <div class="total-label">CA cycle (total)</div>
+      <div class="total-value gold" id="total-ca">—</div>
+    </div>
+    <div class="total-card">
+      <div class="total-label">Bénéfice agence (total)</div>
+      <div class="total-value green" id="total-agence">—</div>
+    </div>
+    <div class="total-card">
+      <div class="total-label">Partenaires actifs</div>
+      <div class="total-value" id="total-count">—</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Partenaire</th>
+        <th class="num">CA cycle</th>
+        <th class="num">Objectif</th>
+        <th class="num">Bénéfice</th>
+        <th class="num">Part partenaire</th>
+        <th class="num">Agence net</th>
+      </tr>
+    </thead>
+    <tbody id="rows">
+      <tr><td colspan="6" class="empty">Chargement…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+// ============================================================================
+// GATE (mot de passe partagé — protection légère, pas une vraie auth)
+// ============================================================================
+const ADMIN_PASSWORD = "incubeo2026"; // à changer si besoin, connu de Paul/Matthéo uniquement
+function tryUnlock() {
+  const val = document.getElementById('lock-pass').value;
+  if (val === ADMIN_PASSWORD) {
+    localStorage.setItem('incubeo_admin_ok', '1');
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadPortfolio();
+  } else {
+    document.getElementById('lock-err').textContent = 'Mot de passe incorrect.';
+  }
+}
+if (localStorage.getItem('incubeo_admin_ok') === '1') {
+  document.getElementById('lock-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+// ============================================================================
+// REGISTRE PARTENAIRES
+// ============================================================================
+const REGISTRY_SHEET_ID = "1GYRZXUad1IGMf04IfeSteZl0cOEcTdwXOjb83Fi51bY";
+
+async function fetchGviz(sheetId, sheetName) {
+  try {
+    const url = sheetName
+      ? `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&headers=0&sheet=${encodeURIComponent(sheetName)}`
+      : `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&headers=1`;
+    const response = await fetch(url, { cache: 'no-store' });
+    const text = await response.text();
+    const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    return { table: { rows: [] } };
+  }
+}
+
+function getRows(data) {
+  if (!data.table || !data.table.rows) return [];
+  return data.table.rows.map(row => row.c.map(cell => {
+    if (!cell) return null;
+    if (cell.v && typeof cell.v === 'string' && cell.v.startsWith('Date(')) {
+      const m = cell.v.match(/Date\((\d+),(\d+),(\d+)/);
+      if (m) return new Date(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
+    }
+    return cell.v;
+  }));
+}
+
+async function getActivePartners() {
+  const data = await fetchGviz(REGISTRY_SHEET_ID);
+  const rows = getRows(data);
+  // colonnes: slug, nom, token, finance_sheet_id, live_sheet_id, statut
+  return rows
+    .filter(r => r && r[5] === 'actif')
+    .map(r => ({ slug: r[0], nom: r[1], token: r[2], financeSheetId: r[3], liveSheetId: r[4] }));
+}
+
+// ============================================================================
+// CALCULS — même logique que le dashboard partenaire (index.html), simplifiée
+// ============================================================================
+function num(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') return v;
+  if (typeof v === 'string') return parseFloat(v.replace(/[^0-9.-]/g, '')) || 0;
+  return 0;
+}
+function pct(v) { const n = num(v); return n > 1 ? n / 100 : n; }
+function parseDate(v) {
+  if (!v) return null;
+  if (v instanceof Date) return v;
+  if (typeof v === 'string') { const d = new Date(v); return isNaN(d.getTime()) ? null : d; }
+  return null;
+}
+function dateInRange(d, start, end) {
+  if (!d || !start || !end) return false;
+  const ts = d.getTime();
+  return ts >= start.getTime() && ts < end.getTime();
+}
+function formatMoney(n) {
+  return Math.round(n).toLocaleString('fr-FR').replace(/,/g, ' ').replace(/ /g, ' ');
+}
+
+async function computePartnerMetrics(partner) {
+  const [paramsRaw, dashRaw, axiRaw, puRaw, raiseRaw, fraisRaw] = await Promise.all([
+    fetchGviz(partner.financeSheetId, 'Paramètres'),
+    fetchGviz(partner.financeSheetId, 'Dashboard'),
+    fetchGviz(partner.financeSheetId, 'Axi'),
+    fetchGviz(partner.financeSheetId, 'PUPrime'),
+    fetchGviz(partner.financeSheetId, 'RaiseFX'),
+    fetchGviz(partner.financeSheetId, 'Frais')
+  ]);
+  const P = getRows(paramsRaw), D = getRows(dashRaw);
+  const axi = getRows(axiRaw), puprime = getRows(puRaw), raisefx = getRows(raiseRaw), frais = getRows(fraisRaw);
+
+  const pB = (row) => { const r = P[row - 1]; return r ? r[1] : null; };
+  const pByLabel = (sub) => { for (const r of P) { if (r && typeof r[0] === 'string' && r[0].toLowerCase().includes(sub)) return r[1]; } return null; };
+  const dG = (row) => { const r = D[row - 1]; const v = r ? r[6] : null; return (v === null || v === undefined || v === '') ? null : num(v); };
+
+  let objective = num(pByLabel('objectif période')) || num(pByLabel('objectif')) || 15000;
+  const bascule = parseDate(pB(6)) || new Date(2026, 7, 1);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const y = today.getFullYear(), mo = today.getMonth(), day = today.getDate();
+  let cStart, cEnd;
+  if (today < bascule) { cStart = new Date(y, mo, 1); cEnd = new Date(y, mo + 1, 0); }
+  else if (day <= 15) { cStart = new Date(y, mo, 1); cEnd = new Date(y, mo, 15); }
+  else { cStart = new Date(y, mo, 16); cEnd = new Date(y, mo + 1, 0); }
+  cStart.setHours(0, 0, 0, 0); cEnd.setHours(23, 59, 59, 999);
+
+  function sumBrokerCol(rows, colIdx) {
+    let total = 0;
+    for (const row of rows) {
+      if (!row || !(row[0] instanceof Date)) continue;
+      if (!dateInRange(row[0], cStart, cEnd)) continue;
+      total += num(row[colIdx]);
+    }
+    return total;
+  }
+
+  const caCycle = sumBrokerCol(axi, 8) + sumBrokerCol(puprime, 8) + sumBrokerCol(raisefx, 8);
+  const fraisCycle = dG(57) !== null ? dG(57) : sumBrokerCol(frais, 3);
+  const benefice = dG(58) !== null ? dG(58) : Math.max(0, caCycle - fraisCycle);
+
+  const minGuarantee = num(pB(11)) || num(pByLabel('minimum garanti')) || 500;
+  const partnerPct = pct(pB(10)) || pct(pByLabel('sur bénéfice')) || 0.30;
+  let partnerRevenue = dG(59);
+  if (partnerRevenue === null) {
+    partnerRevenue = Math.max(minGuarantee, benefice * partnerPct);
+    if (benefice > minGuarantee && partnerRevenue > benefice) partnerRevenue = benefice * partnerPct;
+  }
+  const agence = dG(60) !== null ? dG(60) : Math.max(0, benefice - partnerRevenue);
+
+  return { nom: partner.nom, caCycle, objective, benefice, partnerRevenue, agence };
+}
+
+async function loadPortfolio() {
+  const partners = await getActivePartners();
+  const rowsEl = document.getElementById('rows');
+  if (!partners.length) {
+    rowsEl.innerHTML = '<tr><td colspan="6" class="empty">Aucun partenaire actif dans le registre.</td></tr>';
+    return;
+  }
+  const results = await Promise.all(partners.map(p => computePartnerMetrics(p).catch(() => null)));
+  const valid = results.filter(Boolean);
+
+  rowsEl.innerHTML = valid.map(m => `
+    <tr>
+      <td class="partner-name">${m.nom}</td>
+      <td class="num">${formatMoney(m.caCycle)} $</td>
+      <td class="num">${formatMoney(m.objective)} $</td>
+      <td class="num">${formatMoney(m.benefice)} $</td>
+      <td class="num">${formatMoney(m.partnerRevenue)} $</td>
+      <td class="num">${formatMoney(m.agence)} $</td>
+    </tr>
+  `).join('');
+
+  const totalCa = valid.reduce((s, m) => s + m.caCycle, 0);
+  const totalAgence = valid.reduce((s, m) => s + m.agence, 0);
+  document.getElementById('total-ca').textContent = formatMoney(totalCa) + ' $';
+  document.getElementById('total-agence').textContent = formatMoney(totalAgence) + ' $';
+  document.getElementById('total-count').textContent = valid.length;
+}
+
+if (localStorage.getItem('incubeo_admin_ok') === '1') loadPortfolio();
+</script>
+
+</body>
+</html>
