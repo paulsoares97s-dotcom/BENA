@@ -1322,6 +1322,11 @@ function getRows(data) {
           );
         }
       }
+      // Onglets peu remplis : Google renvoie parfois la date en texte (jj/mm/aaaa)
+      if (typeof cell.v === 'string') {
+        const fr = cell.v.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (fr) return new Date(parseInt(fr[3]), parseInt(fr[2]) - 1, parseInt(fr[1]));
+      }
       return cell.v;
     });
   });
