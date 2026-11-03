@@ -1,5 +1,5 @@
 // BENA — Service Worker v5 : réseau d'abord, cache en secours (hors API)
-const CACHE = 'bena-v8';
+const CACHE = 'bena-v9';
 const STATIC = ['/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {

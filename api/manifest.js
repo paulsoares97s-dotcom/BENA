@@ -3,7 +3,7 @@ const { byToken } = require('./_lib/registry');
 
 module.exports = async (req, res) => {
   const q = req.query || {};
-  let name = 'BENA', start = '/', slug = 'lenny';
+  let name = 'BENA', start = '/', slug = 'incubeo';
   try {
     if (q.admin) { name = 'Incubeo'; slug = 'incubeo'; start = '/?admin=' + encodeURIComponent(q.admin); }
     else if (q.p) { const p = await byToken(q.p); if (p) { name = p.name; slug = p.slug; start = '/?p=' + encodeURIComponent(q.p); } }

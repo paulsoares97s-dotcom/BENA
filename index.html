@@ -350,6 +350,7 @@ const ADMIN = Q.get('admin'), TOKEN = Q.get('p');
 const API = '/api/data' + (ADMIN ? '?admin=' + encodeURIComponent(ADMIN) : TOKEN ? '?p=' + encodeURIComponent(TOKEN) : '');
 const CACHE_KEY = 'bena_v5:' + (ADMIN ? 'agence' : (TOKEN || 'defaut'));
 const S = { data: null, page: ADMIN ? 'agence' : 'jour', pi: 0, depFilter: 'tous', depLimit: 10, histo: 'mois', fDays: 14, fMetric: 'ca', anomLimit: 6, stale: false, staleAt: 0, seen: {}, prev: {} };
+try { Object.keys(localStorage).forEach(k => { if (/^bena_(cache_v1|v2|v3|v4):/.test(k) || k === 'bena_cache_v1') localStorage.removeItem(k); }); } catch (e) {}
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ============================================================================
@@ -474,21 +475,26 @@ function animate(root, pageKey) {
   root.querySelectorAll('.curve, .bars').forEach(x => obs.observe(x));
 }
 
-// Poussière d'or
+// Poussière d'or : sprite pré-rendu, 30 images/s, pause quand l'app est en arrière-plan
 (function dust() {
   if (RM) return;
-  const c = document.getElementById('dust'), g = c.getContext('2d'); let W, H, pts;
-  const size = () => { W = c.width = innerWidth * devicePixelRatio; H = c.height = innerHeight * devicePixelRatio; c.style.width = innerWidth + 'px'; c.style.height = innerHeight + 'px';
-    pts = Array.from({ length: 34 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: (Math.random() * 1.4 + 0.4) * devicePixelRatio, v: (Math.random() * 0.25 + 0.06) * devicePixelRatio, a: Math.random() * 0.5 + 0.15, p: Math.random() * 6.28 })); };
+  const c = document.getElementById('dust'), g = c.getContext('2d'), dpr = Math.min(2, devicePixelRatio || 1);
+  const spr = document.createElement('canvas'); spr.width = spr.height = 32;
+  const sg = spr.getContext('2d'), rg = sg.createRadialGradient(16, 16, 0, 16, 16, 16);
+  rg.addColorStop(0, 'rgba(255,236,180,1)'); rg.addColorStop(0.25, 'rgba(246,197,72,0.55)'); rg.addColorStop(1, 'rgba(246,197,72,0)');
+  sg.fillStyle = rg; sg.fillRect(0, 0, 32, 32);
+  let W, H, pts, last = 0;
+  const size = () => { W = c.width = innerWidth * dpr; H = c.height = innerHeight * dpr; c.style.width = innerWidth + 'px'; c.style.height = innerHeight + 'px';
+    pts = Array.from({ length: 30 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: (Math.random() * 7 + 4) * dpr, v: (Math.random() * 0.45 + 0.12) * dpr, a: Math.random() * 0.45 + 0.15, p: Math.random() * 6.28 })); };
   size(); addEventListener('resize', size);
   const tick = t => {
+    requestAnimationFrame(tick);
+    if (document.hidden || t - last < 33) return; last = t;
     g.clearRect(0, 0, W, H);
     for (const p of pts) {
-      p.y -= p.v; p.x += Math.sin(t / 2400 + p.p) * 0.15 * devicePixelRatio; if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
-      const a = p.a * (0.6 + 0.4 * Math.sin(t / 900 + p.p));
-      g.beginPath(); g.fillStyle = 'rgba(255, 220, 140,' + a + ')'; g.shadowColor = 'rgba(246,197,72,0.9)'; g.shadowBlur = 8 * devicePixelRatio; g.arc(p.x, p.y, p.r, 0, 6.283); g.fill();
+      p.y -= p.v; p.x += Math.sin(t / 2400 + p.p) * 0.3 * dpr; if (p.y < -20) { p.y = H + 20; p.x = Math.random() * W; }
+      g.globalAlpha = p.a * (0.6 + 0.4 * Math.sin(t / 900 + p.p)); g.drawImage(spr, p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
     }
-    if (!document.hidden) requestAnimationFrame(tick); else setTimeout(() => requestAnimationFrame(tick), 500);
   };
   requestAnimationFrame(tick);
 })();
@@ -499,7 +505,9 @@ function animate(root, pageKey) {
 function readCache() { try { const c = JSON.parse(localStorage.getItem(CACHE_KEY)); return c && c.data ? c : null; } catch (e) { return null; } }
 function writeCache(d) { try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: d })); } catch (e) {} }
 const introStart = performance.now();
-function endIntro() { const wait = Math.max(0, 1150 - (performance.now() - introStart)); setTimeout(() => document.getElementById('intro').classList.add('off'), wait); return wait; }
+let introSeen = false; try { introSeen = sessionStorage.getItem('bena_intro') === '1'; sessionStorage.setItem('bena_intro', '1'); } catch (e) {}
+if (introSeen) document.getElementById('intro').classList.add('off');
+function endIntro() { const wait = introSeen ? 0 : Math.max(0, 1150 - (performance.now() - introStart)); setTimeout(() => document.getElementById('intro').classList.add('off'), wait); return wait; }
 async function load() {
   const btn = document.getElementById('refresh'); btn.classList.add('spin');
   try {
@@ -551,7 +559,7 @@ function header() {
   document.getElementById('hello').textContent = onAg ? 'Espace agence' : (h < 18 ? 'Bonjour' : 'Bonsoir') + ' · ' + cap(dL(S.data.today)).replace(/ \d{4}$/, '');
   document.getElementById('name').textContent = nm;
   document.title = nm + ' — Dashboard';
-  const lg = document.getElementById('logo'), slug = onAg ? 'incubeo' : (['lenny', 'romane', 'mohamed'].includes(p.partner.slug) ? p.partner.slug : 'lenny');
+  const lg = document.getElementById('logo'), slug = onAg ? 'incubeo' : (['lenny', 'romane', 'mohamed'].includes(p.partner.slug) ? p.partner.slug : 'incubeo');
   const src = '/icons/' + slug + '-192.png';
   if (lg.getAttribute('src') !== src) { lg.classList.remove('on'); lg.onload = () => lg.classList.add('on'); lg.src = src; }
   const q = onAg ? (S.data.total.quinzaine || {}) : p.quinzaine;
@@ -832,6 +840,7 @@ function agency() {
   h += '<div class="sh rv"><h2>À vérifier</h2><span>' + an.length + '</span></div><div class="sec rv"><div class="glass" style="padding-top:8px">' +
     (an.length ? an.slice(0, S.anomLimit).map(a => '<div class="an"><div class="an-d g' + a.gravite + '"></div><div style="flex:1;min-width:0"><div class="an-t"><span>' + esc(a.name) + '</span><span>' + (a.montant ? money(a.montant) : '') + '</span></div><div class="an-s">' + esc(a.texte) + '<br>' + esc(a.partner.split(' + ').map(short).join(' + ')) + ' · ' + dS(a.date) + '</div></div></div>').join('') : '<div class="empty">Tout est propre</div>') +
     (an.length > S.anomLimit ? '<button class="more" id="an-more">Tout afficher (' + an.length + ')</button>' : '') + '</div></div>';
+  if (d.indisponibles && d.indisponibles.length) h = '<div class="sec"><div class="glass" style="padding:14px 18px;font-size:13.5px;color:var(--neg)">Données indisponibles pour ' + esc(d.indisponibles.map(short).join(', ')) + ' (fichier illisible).</div></div>' + h;
   document.getElementById('p-agence').innerHTML = h;
   if (S._aq) bindCurve(document.getElementById('ca'), S._aq);
   document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => { S.pi = +b.dataset.open; show('jour'); });
@@ -858,6 +867,13 @@ function show(page, silent) {
   try { sessionStorage.setItem('bena_page', page); } catch (e) {}
 }
 document.querySelectorAll('.nav [data-go]').forEach(b => b.onclick = () => { if (navigator.vibrate) navigator.vibrate(6); show(b.dataset.go); });
+// Tirer pour actualiser (utile dans l'app installée sur iPhone, sans barre de navigateur)
+(function ptr() {
+  let y0 = null, pulled = 0; const btn = document.getElementById('refresh');
+  addEventListener('touchstart', e => { y0 = scrollY <= 0 ? e.touches[0].clientY : null; pulled = 0; }, { passive: true });
+  addEventListener('touchmove', e => { if (y0 === null) return; pulled = Math.max(0, e.touches[0].clientY - y0); btn.style.transform = pulled ? 'rotate(' + Math.min(360, pulled * 3) + 'deg) scale(' + (1 + Math.min(0.25, pulled / 400)) + ')' : ''; }, { passive: true });
+  addEventListener('touchend', () => { btn.style.transform = ''; if (pulled > 90) { if (navigator.vibrate) navigator.vibrate(8); load(); } y0 = null; pulled = 0; });
+})();
 addEventListener('scroll', () => document.getElementById('compact').classList.toggle('on', scrollY > 90), { passive: true });
 let rz, lastW = innerWidth; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { movePill(); if (S.data && Math.abs(innerWidth - lastW) > 40) { lastW = innerWidth; render(); } }, 200); });
 

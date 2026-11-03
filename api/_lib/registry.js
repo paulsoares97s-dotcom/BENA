@@ -23,7 +23,7 @@ async function partners() {
 
 async function byToken(token) {
   const list = await partners();
-  if (!token) return list.find(p => p.slug === DEFAULT_SLUG) || list[0] || null;
+  if (!token) return null; // plus d'accès sans lien personnel
   return list.find(p => p.token === token) || null;
 }
 

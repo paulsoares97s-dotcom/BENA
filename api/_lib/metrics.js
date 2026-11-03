@@ -293,7 +293,7 @@ async function partnerMetrics(p) {
       ca: round(sumIn(deps, today, today, 'debloquee')),
       attente: round(sumIn(deps, today, today, 'attente')),
       hier: round(sumIn(deps, addDays(today, -1), addDays(today, -1), 'debloquee')),
-      depots: deps.filter(d => d.date === today)
+      depots: deps.filter(d => d.date === today).length
     },
     mois: {
       key: month.key, start: month.start, end: month.end, jours: monthDays, ecoules: monthElapsed,

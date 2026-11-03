@@ -3,7 +3,7 @@ const { byToken } = require('./_lib/registry');
 const KNOWN = ['lenny', 'romane', 'mohamed', 'incubeo'];
 module.exports = async (req, res) => {
   const q = req.query || {};
-  let slug = 'lenny';
+  let slug = 'incubeo';
   try {
     if (q.admin) slug = 'incubeo';
     else if (q.p) { const p = await byToken(q.p); if (p && KNOWN.includes(p.slug)) slug = p.slug; }

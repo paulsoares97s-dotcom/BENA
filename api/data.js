@@ -33,8 +33,11 @@ module.exports = async (req, res) => {
       if (!key || !safeEqual(q.admin, key)) { res.statusCode = 403; return res.end(JSON.stringify({ error: 'Accès refusé' })); }
       const body = await cached('admin', async () => {
         const list = await partners();
-        const all = await Promise.all(list.map(p => partnerMetrics(p)));
-        return { mode: 'agence', source, generatedAt: new Date().toISOString(), ...agencyView(all) };
+        // Un fichier illisible ne bloque pas toute la vue agence.
+        const settled = await Promise.allSettled(list.map(p => partnerMetrics(p)));
+        const all = settled.filter(r => r.status === 'fulfilled').map(r => r.value);
+        const failed = list.filter((p, i) => settled[i].status === 'rejected').map(p => p.name);
+        return { mode: 'agence', source, generatedAt: new Date().toISOString(), indisponibles: failed, ...agencyView(all) };
       });
       return res.end(JSON.stringify(body));
     }
