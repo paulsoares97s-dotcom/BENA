@@ -69,7 +69,10 @@ function parseText(s) {
 // ---------- Lecture ----------
 // Retourne { [nomOnglet]: tableau 2D } ; les cellules dates sont des objets { date: 'AAAA-MM-JJ' }.
 async function readTabs(sheetId, tabs) {
-  if (hasServiceAccount()) return readTabsApi(sheetId, tabs);
+  if (hasServiceAccount()) {
+    try { return await readTabsApi(sheetId, tabs); }
+    catch (e) { /* fichier non partagé avec le compte de service : on tente la lecture publique */ }
+  }
   const out = {};
   await Promise.all(tabs.map(async tab => { out[tab] = await readTabGviz(sheetId, tab); }));
   return out;

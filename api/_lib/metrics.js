@@ -152,10 +152,11 @@ function statusVsPace(ca, objectif, elapsed, total) {
   const progress = ca / objectif * 100;
   const expected = elapsed / total * 100;
   const diff = progress - expected;
-  if (progress >= 100) return { code: 'done', label: 'Objectif atteint', progress, expected, diff };
-  if (diff > 5) return { code: 'ahead', label: 'En avance', progress, expected, diff };
-  if (diff < -5) return { code: 'behind', label: 'En retard', progress, expected, diff };
-  return { code: 'ontrack', label: 'Dans les temps', progress, expected, diff };
+  const vsPace = expected > 0 ? (progress / expected - 1) * 100 : 0; // écart en % par rapport au rythme attendu
+  if (progress >= 100) return { code: 'done', label: 'Objectif atteint', progress, expected, diff, vsPace };
+  if (vsPace > 10) return { code: 'ahead', label: 'En avance', progress, expected, diff, vsPace };
+  if (vsPace < -10) return { code: 'behind', label: 'En retard', progress, expected, diff, vsPace };
+  return { code: 'ontrack', label: 'Dans les temps', progress, expected, diff, vsPace };
 }
 
 function dailySeries(deps, funnelTg, funnelLive, start, end) {
@@ -204,7 +205,7 @@ function anomaliesFor(deps, today, partnerName) {
         texte: 'En attente depuis ' + daysBetween(d.date, today) + ' jours' });
     if (d.statut && d.statutSetter && d.statut !== d.statutSetter)
       out.push({ type: 'conflit', gravite: 2, partner: partnerName, date: d.date, name: d.name, broker: d.broker, montant: d.commission,
-        texte: 'Statut « ' + d.statutLabel + ' » mais setter « ' + d.statutSetterLabel + ' »' });
+        texte: d.statut === 'annulee' ? 'Annulée par la règle de retrait, mais Felana l’indique « ' + d.statutSetterLabel + ' »' : 'Statut « ' + d.statutLabel + ' », Felana indique « ' + d.statutSetterLabel + ' »' });
   });
   groupClients(deps).forEach(g => {
     out.push({ type: 'doublon', gravite: 3, partner: partnerName, date: g[0].date, name: g[0].name, broker: g.map(x => x.broker).join(' + '),
@@ -224,7 +225,15 @@ async function partnerMetrics(p) {
   ]);
   const sourceIssues = { telegram: tg._err || ((tg.Saisie || []).length ? null : 'onglet Saisie vide'), live: live._err || ((live.Saisie || []).length ? null : 'onglet Saisie vide') };
   const params = readParams(fin['Paramètres'] || []);
-  const deps = readDeposits(fin);
+  const raw = readDeposits(fin);
+  // Un client ne compte qu'une fois : en cas de doublon, on garde la ligne au meilleur statut.
+  const rank = { debloquee: 3, attente: 2, annulee: 1 };
+  const drop = new Set();
+  groupClients(raw).forEach(g => {
+    const keep = g.slice().sort((a, b) => (rank[b.statut] || 0) - (rank[a.statut] || 0) || (a.date < b.date ? 1 : -1))[0];
+    g.forEach(x => { if (x !== keep) drop.add(x); });
+  });
+  const deps = raw.filter(x => !drop.has(x));
   // Le partenaire est actif à partir du mois de son premier dépôt (sinon : mois en cours).
   const first = deps.length ? deps[deps.length - 1].date : todayIso();
   params.activeFrom = first.slice(0, 8) + '01';
@@ -310,7 +319,7 @@ async function partnerMetrics(p) {
     encaissements: payouts,
     depots: deps.slice(0, 200).map(d => ({ date: d.date, name: d.name, tg: d.tg, broker: d.broker, setter: d.setter,
       depot: d.depot, commission: d.commission, statut: d.statut, statutLabel: d.statutLabel })),
-    anomalies: anomaliesFor(deps, today, p.name),
+    anomalies: anomaliesFor(raw, today, p.name),
     sources: sourceIssues,
     _deps: deps
   };
@@ -357,7 +366,13 @@ function agencyView(list) {
     total: {
       ca: sum('ca'), objectif: sum('objectif'), attente: sum('attente'), frais: sum('frais'), benefice: sum('benefice'),
       partenaires: sum('partner'), agence: sum('agence'), depots: sum('depots'),
-      caJour: round(partners.reduce((s, p) => s + p.jour.ca, 0))
+      caJour: round(partners.reduce((s, p) => s + p.jour.ca, 0)),
+      quinzaine: {
+        ca: round(partners.reduce((s, p) => s + p.quinzaine.ca, 0)),
+        objectif: round(partners.reduce((s, p) => s + p.quinzaine.objectif, 0)),
+        attente: round(partners.reduce((s, p) => s + p.quinzaine.attente, 0)),
+        depots: partners.reduce((s, p) => s + p.quinzaine.depots, 0)
+      }
     },
     encaissements: Object.values(payoutMap).sort((a, b) => (a.date < b.date ? -1 : 1)),
     anomalies,
