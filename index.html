@@ -45,6 +45,7 @@
     --radius: 22px;
     --serif: 'Instrument Serif', Georgia, serif;
   }
+  [hidden] { display: none !important; }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { background: var(--bg-deep); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
   body {
@@ -103,7 +104,7 @@
   .stat-n { font-size: 11.5px; color: var(--dim); margin-top: 4px; }
   .stats { margin-bottom: 14px; }
 
-  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 100px; font-size: 11.5px; font-weight: 600; letter-spacing: 0.2px; }
+  .pill { white-space: nowrap; flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 100px; font-size: 11.5px; font-weight: 600; letter-spacing: 0.2px; }
   .pill.ahead, .pill.done { background: var(--green-soft); color: var(--green); }
   .pill.behind { background: var(--red-soft); color: var(--red); }
   .pill.ontrack { background: var(--gold-soft); color: var(--gold); }
@@ -178,6 +179,7 @@
   .pcard { display: block; width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-top: 10px; }
   .pcard-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .pcard-n { font-family: var(--serif); font-size: 22px; }
+  .pcard-b { display: block; font-size: 11px; color: var(--dimmer); margin-top: 2px; letter-spacing: 0.3px; }
   .pcard-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-top: 10px; }
   .pcard-row b { color: var(--text); font-weight: 600; }
   .pcard .bar { height: 6px; margin-top: 10px; }
@@ -281,6 +283,8 @@ const monthName = key => { const [y, m] = key.split('-').map(Number); return MOI
 const monthShort = key => { const [, m] = key.split('-').map(Number); return MOIS_C[m - 1]; };
 const daysAgo = (a, b) => Math.round((dObj(b) - dObj(a)) / 86400000);
 const brokerIco = b => b === 'PUPrime' ? '<div class="li-ico pu">PU</div>' : b === 'RaiseFX' ? '<div class="li-ico rf">RF</div>' : '<div class="li-ico">AX</div>';
+const short = n => String(n || '').replace(/\s*\(.*\)\s*/, '').trim() || n;
+const brandOf = n => { const m = String(n || '').match(/\((.*)\)/); return m ? m[1] : ''; };
 const statusTxt = { debloquee: 'Débloquée', attente: 'En attente', annulee: 'Annulée' };
 const pillArrow = { ahead: '↑', behind: '↓', ontrack: '→', done: '★', none: '·' };
 function pill(st) {
@@ -367,7 +371,7 @@ function renderChips() {
   const d = S.data, el = document.getElementById('chips');
   if (d.mode !== 'agence' || S.page === 'agence') { el.hidden = true; return; }
   el.hidden = false;
-  el.innerHTML = d.partners.map((p, i) => '<button class="chip' + (i === S.partnerIdx ? ' on' : '') + '" data-pi="' + i + '">' + esc(p.partner.name) + '</button>').join('');
+  el.innerHTML = d.partners.map((p, i) => '<button class="chip' + (i === S.partnerIdx ? ' on' : '') + '" data-pi="' + i + '">' + esc(short(p.partner.name)) + '</button>').join('');
   el.querySelectorAll('[data-pi]').forEach(b => b.onclick = () => { S.partnerIdx = +b.dataset.pi; S.depLimit = 12; render(); window.scrollTo({ top: 0 }); });
 }
 
@@ -415,9 +419,9 @@ function depositsCard(p) {
   const f = S.depFilter;
   const all = p.depots.filter(x => f === 'tous' || x.statut === f);
   const list = all.slice(0, S.depLimit);
-  return '<div class="card" id="dep-card"><div class="eyebrow">Derniers dépôts <span class="seg">' +
+  return '<div class="card" id="dep-card"><div class="eyebrow">Derniers dépôts <span class="r">' + all.length + '</span></div><div class="seg" style="margin-top:12px">' +
     ['tous', 'debloquee', 'attente', 'annulee'].map(k => '<button data-df="' + k + '" class="' + (f === k ? 'on' : '') + '">' + (k === 'tous' ? 'Tous' : k === 'debloquee' ? 'Débloqués' : k === 'attente' ? 'Attente' : 'Annulés') + '</button>').join('') +
-    '</span></div><div class="list">' +
+    '</div><div class="list">' +
     (list.length ? list.map(x => '<div class="li">' + brokerIco(x.broker) +
       '<div class="li-main"><div class="li-t">' + esc(x.name) + '</div><div class="li-s">' + dShort(x.date) + ' · ' + esc(x.broker) + (x.depot ? ' · dépôt ' + money(x.depot) : '') + (x.setter ? ' · ' + esc(x.setter) : '') + '</div></div>' +
       '<div class="li-v"><div class="a">' + money(x.commission) + '</div><div class="b st-' + (x.statut || 'x') + '">' + esc(statusTxt[x.statut] || x.statutLabel || '—') + '</div></div></div>').join('')
@@ -459,7 +463,7 @@ function renderMois(p, isAgency) {
   const prev = m.precedent;
   const ev = prev.ca ? (m.ca / (m.ecoules / m.jours) - prev.ca) / prev.ca * 100 : null;
   html += '<div class="card flat"><div class="eyebrow">' + monthName(prev.key) + ' <span class="r">mois précédent</span></div><div class="list" style="margin-top:8px">' +
-    kv('CA débloqué', money(prev.ca)) + kv('Part ' + esc(p.partner.name), money(prev.partner)) + (isAgency ? kv('Marge agence', money(prev.agence)) : '') +
+    kv('CA débloqué', money(prev.ca)) + kv('Part ' + esc(short(p.partner.name)), money(prev.partner)) + (isAgency ? kv('Marge agence', money(prev.agence)) : '') +
     '</div>' + (ev !== null ? '<div class="sub">Au rythme actuel, ce mois finirait à <b style="color:' + (ev >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (ev >= 0 ? '+' : '') + Math.round(ev) + ' %</b> par rapport à ' + MOIS[dParts(prev.key + '-01')[1] - 1] + '.</div>' : '') + '</div></div>';
 
   // Graph quinzaine
@@ -546,7 +550,7 @@ function renderAgency() {
   html += '<div class="grid-2"><div class="card"><div class="eyebrow">Partenaires <span class="r">CA du mois</span></div>' +
     d.partners.map((p, i) => {
       const m = p.mois, pr = m.objectif ? Math.min(100, m.ca / m.objectif * 100) : 0;
-      return '<button class="pcard" data-open="' + i + '"><div class="pcard-h"><span class="pcard-n">' + esc(p.partner.name) + '</span>' + pill(m.statut) + '</div>' +
+      return '<button class="pcard" data-open="' + i + '"><div class="pcard-h"><span><span class="pcard-n">' + esc(short(p.partner.name)) + '</span>' + (brandOf(p.partner.name) ? '<span class="pcard-b">' + esc(brandOf(p.partner.name)) + '</span>' : '') + '</span>' + pill(m.statut) + '</div>' +
         '<div class="bar"><div class="bar-fill" style="width:' + pr + '%"></div><div class="bar-mark" style="left:calc(' + Math.min(100, m.ecoules / m.jours * 100) + '% - 1px)"></div></div>' +
         '<div class="pcard-row"><span><b>' + money(m.ca) + '</b> / ' + money(m.objectif) + '</span><span>' + (m.attente ? '<span class="st-attente">' + money(m.attente) + ' en attente</span>' : m.depots + ' dépôts') + '</span></div>' +
         '<div class="pcard-row"><span>Aujourd\'hui <b>' + money(p.jour.ca) + '</b></span><span>Marge <b>' + money(m.agence) + '</b></span></div></button>';
