@@ -1,6 +1,6 @@
-// BENA 🫀 — Service Worker v3
-const CACHE = 'bena-v3';
-const STATIC = ['/icon-192.png', '/icon-512.png', '/badge-96.png', '/manifest.json'];
+// BENA 🫀 — Service Worker v4
+const CACHE = 'bena-v4';
+const STATIC = ['/icon-192.png', '/icon-512.png', '/manifest.json'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(STATIC)));
@@ -31,26 +31,3 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-self.addEventListener('push', (event) => {
-  let data = { title: '💸 DÉPÔT ENCAISSÉ', body: 'Nouveau dépôt !' };
-  try { data = event.data.json(); } catch (e) {}
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/icon-192.png',
-      badge: '/badge-96.png'
-    })
-  );
-});
-
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
-      for (const client of list) {
-        if ('focus' in client) return client.focus();
-      }
-      return clients.openWindow('/');
-    })
-  );
-});

@@ -1026,86 +1026,7 @@
   .cascade-row.final { background: rgba(0, 255, 148, 0.04); }
   .cascade-row.final strong { color: var(--green); }
 
-  /* ===== PANNEAU NOTIFICATIONS ===== */
-  .bena-panel {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(6, 9, 18, 0.85);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 10000;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .bena-panel.open { display: flex; }
-  .bena-panel-inner {
-    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
-    border: 1px solid var(--border-bright);
-    border-radius: 22px;
-    padding: 28px 22px;
-    max-width: 340px;
-    width: 100%;
-    text-align: center;
-    box-shadow: var(--shadow-deep);
-  }
-  .bena-panel-inner .bp-emoji { font-size: 34px; margin-bottom: 6px; }
-  .bena-panel-inner .bp-title {
-    font-weight: 800;
-    font-size: 17px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-  }
-  .bena-panel-inner .bp-sub {
-    color: var(--text-dim);
-    font-size: 13px;
-    margin: 8px 0 20px;
-    line-height: 1.4;
-  }
-  .bena-panel-inner select {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--bg-deep);
-    color: var(--text);
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    text-align: center;
-    appearance: none;
-    font-family: inherit;
-  }
-  .bena-panel-inner .bp-btn {
-    width: 100%;
-    padding: 15px;
-    border-radius: 12px;
-    border: none;
-    background: var(--gold);
-    color: #060912;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    letter-spacing: 0.5px;
-  }
-  .bena-panel-inner .bp-btn:disabled { opacity: 0.5; }
-  .bena-panel-inner .bp-status {
-    margin-top: 14px;
-    font-size: 13px;
-    color: var(--text-dim);
-    min-height: 34px;
-    line-height: 1.5;
-  }
-  .bena-panel-inner .bp-close {
-    margin-top: 8px;
-    font-size: 13px;
-    color: var(--text-dimmer);
-    cursor: pointer;
-  }
-  .stat-prev { margin-top: 9px; font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--text-dimmer); }
-  .stat-prev b { color: var(--gold); font-weight: 800; }
+
 </style>
 </head>
 <body>
@@ -1327,26 +1248,7 @@
   <button class="nav-item active" id="nav-home" onclick="switchPage('home')"><span class="nav-ico">⌂</span>Accueil</button>
   <button class="nav-item" id="nav-depots" onclick="switchPage('depots')"><span class="nav-ico">$</span>Dépôts</button>
   <button class="nav-item" id="nav-cycle" onclick="switchPage('cycle')"><span class="nav-ico">◎</span>Cycle</button>
-  <button class="nav-item" id="bena-fab"><span class="nav-ico">🔔</span>Alertes</button>
 </nav>
-
-<!-- PANNEAU NOTIFICATIONS -->
-<div class="bena-panel" id="bena-panel">
-  <div class="bena-panel-inner">
-    <div class="bp-emoji">🫀</div>
-    <div class="bp-title">Notifications dépôts</div>
-    <div class="bp-sub">Reçois une notif à chaque dépôt encaissé 💰</div>
-    <select id="bena-who">
-      <option value="" disabled selected>Qui es-tu ?</option>
-      <option value="Paul">Paul</option>
-      <option value="Matthéo">Matthéo</option>
-      <option value="Lenny">Lenny</option>
-    </select>
-    <button class="bp-btn" id="bena-activate">🔔 Activer les notifications</button>
-    <div class="bp-status" id="bena-status"></div>
-    <div class="bp-close" id="bena-close">Fermer</div>
-  </div>
-</div>
 
 <script>
 // ============================================================================
@@ -1548,8 +1450,8 @@ function computeMetrics(data) {
   const P = data.params || [];
   const pB = (sheetRow) => { const r = P[sheetRow - 1]; return r ? r[1] : null; };
   const pByLabel = (sub) => { for (const r of P) { if (r && typeof r[0] === 'string' && r[0].toLowerCase().includes(sub)) return r[1]; } return null; };
-  let objective = num(pB(23)) || num(pByLabel('objectif période')) || num(pByLabel('objectif')) || 30000;
-  if (objective < 100 || objective > 10000000) objective = 30000;
+  let objective = num(pB(23)) || num(pByLabel('objectif période')) || num(pByLabel('objectif')) || 0;
+  if (objective < 100 || objective > 10000000) objective = 0;
   const cycleStart = parseDate(pB(20)) || parseDate(pByLabel('début période'));
   const cycleEnd = parseDate(pB(21)) || parseDate(pByLabel('fin période'));
   const cycleStartPrev = null;
@@ -1566,11 +1468,11 @@ function computeMetrics(data) {
   const _cy = today.getFullYear(), _cmo = today.getMonth(), _cday = today.getDate();
   let cStart, cEnd;
   if (today < bascule) {
-    cStart = new Date(_cy, _cmo, 1);   cEnd = new Date(_cy, _cmo + 1, 0);  objective = 30000; // cycle mensuel (transition)
+    cStart = new Date(_cy, _cmo, 1);   cEnd = new Date(_cy, _cmo + 1, 0); // cycle mensuel (transition)
   } else if (_cday <= 15) {
-    cStart = new Date(_cy, _cmo, 1);   cEnd = new Date(_cy, _cmo, 15);     objective = 15000; // P1 : 1 -> 15
+    cStart = new Date(_cy, _cmo, 1);   cEnd = new Date(_cy, _cmo, 15);     // P1 : 1 -> 15
   } else {
-    cStart = new Date(_cy, _cmo, 16);  cEnd = new Date(_cy, _cmo + 1, 0);  objective = 15000; // P2 : 16 -> fin de mois
+    cStart = new Date(_cy, _cmo, 16);  cEnd = new Date(_cy, _cmo + 1, 0);  // P2 : 16 -> fin de mois
   }
   cStart.setHours(0, 0, 0, 0);
   cEnd.setHours(23, 59, 59, 999); // borne de fin INCLUSIVE (corrige l'ancien decalage)
@@ -2266,78 +2168,9 @@ document.addEventListener('visibilitychange', () => {
 })();
 
 // ============================================================================
-// NOTIFICATIONS PUSH (onglet Alertes)
-// ============================================================================
-(function () {
-  const VAPID_PUBLIC_KEY = 'BAbI9IeZR3uR1nVIMASdlHN-OXbus9muqiH8ifzvepUAHDfGXvlZXETfmWs9zsbqigW468vBPhXosBTv9GZx22c';
-  const fab = document.getElementById('bena-fab');
-  const panel = document.getElementById('bena-panel');
-  const statusEl = document.getElementById('bena-status');
-  const btn = document.getElementById('bena-activate');
-
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
-
-  function isStandalone() {
-    return window.navigator.standalone === true ||
-           window.matchMedia('(display-mode: standalone)').matches;
-  }
-
-  fab.addEventListener('click', () => {
-    panel.classList.add('open');
-    if (!isStandalone()) {
-      statusEl.innerHTML = '<span style="color:#FFD700">⚠️ Ouvre l\'app depuis l\'icône BENA 🫀 de ton écran d\'accueil pour activer (pas depuis Safari).</span>';
-    } else {
-      statusEl.textContent = '';
-    }
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready
-        .then(reg => reg.pushManager.getSubscription())
-        .then(sub => {
-          if (sub) statusEl.innerHTML = '<span style="color:#00FF94;font-weight:700">✅ Notifications déjà actives sur cet appareil.</span>';
-        });
-    }
-  });
-  document.getElementById('bena-close').addEventListener('click', () => panel.classList.remove('open'));
-  panel.addEventListener('click', (e) => { if (e.target === panel) panel.classList.remove('open'); });
-
-  function b64ToUint8(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const raw = atob(base64);
-    const arr = new Uint8Array(raw.length);
-    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-    return arr;
-  }
-
-  btn.addEventListener('click', () => {
-    const who = document.getElementById('bena-who').value;
-    if (!who) { statusEl.innerHTML = '<span style="color:#FFD700">Choisis ton prénom d\'abord 👆</span>'; return; }
-    btn.disabled = true;
-    statusEl.textContent = 'Activation en cours…';
-    Notification.requestPermission().then(perm => {
-      if (perm !== 'granted') throw new Error('Permission refusée. Réglages → Notifications → BENA pour autoriser.');
-      return navigator.serviceWorker.ready;
-    }).then(reg => reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: b64ToUint8(VAPID_PUBLIC_KEY)
-    })).then(subscription => fetch('/api/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription, label: who })
-    })).then(r => {
-      if (!r.ok) throw new Error('Erreur serveur');
-      statusEl.innerHTML = '<span style="color:#00FF94;font-weight:700">✅ C\'est bon ' + who + ' ! Tu recevras une notif à chaque dépôt. 💰</span>';
-    }).catch(e => {
-      statusEl.innerHTML = '<span style="color:#FFD700">' + e.message + '</span>';
-    }).finally(() => {
-      btn.disabled = false;
-    });
-  });
-})();
-
-// ============================================================================
 // INIT
 // ============================================================================
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 document.getElementById('app').classList.add('loading');
 (async () => {
   await resolvePartner();
