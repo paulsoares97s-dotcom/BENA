@@ -196,9 +196,11 @@ async function partnerMetrics(p) {
   const today = todayIso();
   const [fin, tg, live] = await Promise.all([
     readTabs(p.finance, ['Paramètres', ...BROKERS]),
-    p.telegram ? readTabs(p.telegram, ['Saisie']).catch(() => ({})) : {},
-    p.live ? readTabs(p.live, ['Saisie']).catch(() => ({})) : {}
+    p.telegram ? readTabs(p.telegram, ['Saisie']).catch(e => ({ _err: String(e.message || e) })) : { _err: 'aucun fichier Telegram' },
+    p.live ? readTabs(p.live, ['Saisie']).catch(e => ({ _err: String(e.message || e) })) : { _err: 'aucun fichier Live' }
   ]);
+  const sourceIssues = { telegram: tg._err || ((tg.Saisie || []).length ? null : 'onglet Saisie vide'), live: live._err || ((live.Saisie || []).length ? null : 'onglet Saisie vide'),
+    telegramRows: (tg.Saisie || []).length, liveRows: (live.Saisie || []).length, sample: (tg.Saisie || []).slice(180, 183) };
   const params = readParams(fin['Paramètres'] || []);
   const deps = readDeposits(fin);
   const funnelTg = readTelegram(tg.Saisie);
@@ -284,6 +286,7 @@ async function partnerMetrics(p) {
     depots: deps.slice(0, 200).map(d => ({ date: d.date, name: d.name, tg: d.tg, broker: d.broker, setter: d.setter,
       depot: d.depot, commission: d.commission, statut: d.statut, statutLabel: d.statutLabel })),
     anomalies: anomaliesFor(deps, today, p.name),
+    sources: sourceIssues,
     _deps: deps
   };
 }
