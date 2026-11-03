@@ -6,12 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#04070F">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" id="manifest-link" href="/api/manifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Dashboard</title>
 <script>
-  // Le manifest suit le lien ouvert : l'icône de l'écran d'accueil rouvre le bon espace.
   (function () {
     var q = new URLSearchParams(location.search), s = '';
     if (q.get('admin')) s = '?admin=' + encodeURIComponent(q.get('admin'));
@@ -21,219 +20,266 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-deep: #04070F;
-    --bg: #0A0E1A;
-    --card: #0D1222;
-    --card-2: #121831;
-    --line: #1A2140;
-    --line-2: #262F55;
-    --text: #F4F5FA;
-    --dim: #8B92B5;
-    --dimmer: #565C83;
-    --gold: #F5C542;
-    --gold-2: #FFE08A;
-    --gold-soft: rgba(245, 197, 66, 0.12);
-    --green: #2EE59D;
-    --green-soft: rgba(46, 229, 157, 0.12);
-    --red: #FF5C6C;
-    --red-soft: rgba(255, 92, 108, 0.12);
-    --blue: #7AA2FF;
-    --blue-soft: rgba(122, 162, 255, 0.12);
-    --radius: 22px;
-    --serif: 'Instrument Serif', Georgia, serif;
+    --bg: #000000;
+    --s1: #0E0E10;
+    --s2: #151518;
+    --s3: #1D1D21;
+    --hair: rgba(255, 255, 255, 0.07);
+    --hair-2: rgba(255, 255, 255, 0.12);
+    --t1: #FFFFFF;
+    --t2: #9A9AA3;
+    --t3: #5E5E66;
+    --gold: #F6C548;
+    --gold-hi: #FFE39A;
+    --gold-lo: #C98B12;
+    --gold-a: rgba(246, 197, 72, 0.12);
+    --pos: #3DDC97;
+    --pos-a: rgba(61, 220, 151, 0.12);
+    --neg: #FF6B6B;
+    --neg-a: rgba(255, 107, 107, 0.12);
+    --info: #6EA8FF;
+    --info-a: rgba(110, 168, 255, 0.13);
+    --r-xl: 28px;
+    --r-lg: 22px;
+    --r-md: 16px;
+    --ease: cubic-bezier(.22, .9, .25, 1);
   }
   [hidden] { display: none !important; }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { background: var(--bg-deep); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
+  html { background: var(--bg); }
   body {
-    min-height: 100vh; overflow-x: hidden; font-feature-settings: 'ss01', 'cv11', 'tnum';
-    background:
-      radial-gradient(ellipse 90% 50% at 50% -10%, rgba(245, 197, 66, 0.08), transparent 70%),
-      radial-gradient(ellipse 60% 40% at 100% 70%, rgba(122, 162, 255, 0.04), transparent 70%),
-      var(--bg-deep);
-    padding: max(22px, env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom));
+    min-height: 100vh; background: var(--bg); color: var(--t1); overflow-x: hidden;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+    font-feature-settings: 'tnum' 1, 'ss01' 1; -webkit-font-smoothing: antialiased; letter-spacing: -0.01em;
+    padding: max(14px, env(safe-area-inset-top)) 0 calc(110px + env(safe-area-inset-bottom));
   }
-  .wrap { max-width: 460px; margin: 0 auto; }
-  @media (min-width: 900px) { .wrap { max-width: 980px; } .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } .grid-2 > .card { margin-bottom: 0; } .grid-2 { margin-bottom: 14px; } }
-  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; letter-spacing: inherit; }
+  .app { max-width: 480px; margin: 0 auto; position: relative; }
+  .pad { padding: 0 16px; }
 
-  /* ---------- En-tête ---------- */
-  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; gap: 12px; }
-  .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-  .avatar { width: 42px; height: 42px; border-radius: 14px; flex: none; display: grid; place-items: center; font-family: var(--serif); font-size: 24px; color: #1a1300; background: linear-gradient(140deg, var(--gold-2), var(--gold) 55%, #B8860B); box-shadow: 0 6px 24px rgba(245, 197, 66, 0.25); }
-  .who { min-width: 0; }
-  .who-name { font-family: var(--serif); font-size: 26px; line-height: 1; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .who-sub { font-size: 11px; color: var(--dim); margin-top: 4px; letter-spacing: 0.3px; }
-  .live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 6px; vertical-align: 1px; box-shadow: 0 0 0 0 rgba(46, 229, 157, 0.6); animation: pulse 2.4s infinite; }
-  .live-dot.off { background: var(--dimmer); animation: none; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(46, 229, 157, 0.5); } 70% { box-shadow: 0 0 0 7px rgba(46, 229, 157, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 229, 157, 0); } }
-  .icon-btn { width: 40px; height: 40px; border-radius: 13px; border: 1px solid var(--line); background: var(--card); display: grid; place-items: center; color: var(--dim); flex: none; }
-  .icon-btn svg { width: 18px; height: 18px; }
-  .icon-btn.spin svg { animation: spin 0.9s linear infinite; }
+  /* Lueur or derrière l'en-tête */
+  .aura { position: fixed; inset: -30vh -20vw auto; height: 75vh; pointer-events: none; z-index: 0;
+    background: radial-gradient(60% 55% at 50% 30%, rgba(246, 197, 72, 0.16), rgba(246, 197, 72, 0.04) 45%, transparent 70%); filter: blur(10px); }
+  .app > * { position: relative; z-index: 1; }
+
+  /* ---------- Barre du haut ---------- */
+  .bar-top { display: flex; align-items: center; gap: 10px; padding: 6px 16px 0; height: 52px; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 15px; color: #1B1400; flex: none;
+    background: conic-gradient(from 210deg, var(--gold-hi), var(--gold), var(--gold-lo), var(--gold-hi)); box-shadow: 0 0 0 3px rgba(246, 197, 72, 0.14); }
+  .who { flex: 1; min-width: 0; }
+  .who-n { font-size: 15px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .who-s { font-size: 12px; color: var(--t2); margin-top: 1px; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pos); box-shadow: 0 0 10px var(--pos); }
+  .dot.off { background: var(--t3); box-shadow: none; }
+  .round { width: 38px; height: 38px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); display: grid; place-items: center; color: var(--t1); flex: none;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: transform .2s var(--ease), background .2s; }
+  .round:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.1); }
+  .round svg { width: 18px; height: 18px; }
+  .round.spin svg { animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ---------- Sélecteur partenaire (agence) ---------- */
-  .chips { display: flex; gap: 8px; overflow-x: auto; margin: -6px -16px 18px; padding: 0 16px 4px; scrollbar-width: none; }
-  .chips::-webkit-scrollbar { display: none; }
-  .chip { flex: none; padding: 9px 15px; border-radius: 100px; border: 1px solid var(--line); background: var(--card); font-size: 13px; font-weight: 500; color: var(--dim); }
-  .chip.on { color: #1a1300; background: var(--gold); border-color: var(--gold); font-weight: 600; }
+  /* ---------- Sélecteur partenaire ---------- */
+  .tabs { display: flex; gap: 6px; padding: 14px 16px 2px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: none; height: 34px; padding: 0 14px; border-radius: 100px; font-size: 13.5px; font-weight: 500; color: var(--t2); background: rgba(255, 255, 255, 0.05); transition: all .25s var(--ease); }
+  .tab.on { background: var(--t1); color: #000; }
+
+  /* ---------- Héro ---------- */
+  .hero { text-align: center; padding: 34px 16px 8px; }
+  .hero-l { font-size: 13px; color: var(--t2); font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+  .amount { font-size: 58px; font-weight: 600; letter-spacing: -0.055em; line-height: 1; margin-top: 10px; display: inline-flex; align-items: flex-start; gap: 4px; }
+  .amount .c { font-size: 0.42em; font-weight: 500; color: var(--t2); margin-top: 0.22em; letter-spacing: -0.02em; }
+  .hero-chip { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; height: 34px; padding: 0 14px 0 12px; border-radius: 100px; background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); font-size: 13px; font-weight: 500; }
+  .hero-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 12px var(--gold); }
+  .spark { margin: 22px 16px 0; height: 120px; position: relative; }
+  .spark svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .spark-legend { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--t3); padding: 6px 16px 0; }
+
+  /* ---------- Rangée d'actions (style banque) ---------- */
+  .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 22px 12px 6px; }
+  .act { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: var(--t1); }
+  .act-i { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.08); transition: transform .2s var(--ease); }
+  .act:active .act-i { transform: scale(0.9); }
+  .act-i svg { width: 21px; height: 21px; }
+  .act-v { font-size: 11.5px; color: var(--t2); margin-top: -4px; }
 
   /* ---------- Cartes ---------- */
-  .card { background: linear-gradient(180deg, var(--card-2), var(--card)); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; position: relative; overflow: hidden; }
-  .card.flat { background: var(--card); }
-  .eyebrow { font-size: 10.5px; font-weight: 600; letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .eyebrow .r { letter-spacing: 0.4px; text-transform: none; font-weight: 500; color: var(--dimmer); }
-  .big { font-family: var(--serif); font-size: 64px; line-height: 0.95; letter-spacing: -1.5px; margin-top: 12px; }
-  .big .cur { font-size: 0.5em; color: var(--gold); margin-right: 3px; vertical-align: 0.55em; letter-spacing: 0; }
-  .mid { font-family: var(--serif); font-size: 34px; line-height: 1; letter-spacing: -0.5px; }
-  .mid .cur { font-size: 0.55em; color: var(--gold); margin-right: 2px; vertical-align: 0.45em; }
-  .sub { font-size: 13px; color: var(--dim); margin-top: 10px; line-height: 1.5; }
-  .sub b { color: var(--text); font-weight: 600; }
-  .hero { padding: 24px 22px 22px; border-color: var(--line-2); }
-  .hero::after { content: ''; position: absolute; inset: auto -40% -60% auto; width: 300px; height: 300px; background: radial-gradient(circle, rgba(245, 197, 66, 0.13), transparent 65%); pointer-events: none; }
+  .card { background: var(--s1); border-radius: var(--r-xl); padding: 18px; margin: 12px 16px 0; position: relative; overflow: hidden; }
+  .card-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 24px; }
+  .card-t { font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+  .card-s { font-size: 13px; color: var(--t2); }
+  .link { font-size: 13px; color: var(--gold); font-weight: 500; }
+  .big { font-size: 34px; font-weight: 600; letter-spacing: -0.045em; line-height: 1.05; }
+  .big .c { font-size: 0.5em; color: var(--t2); font-weight: 500; margin-left: 3px; }
+  .mute { color: var(--t2); }
+  .gold { color: var(--gold); }
+  .pos { color: var(--pos); } .neg { color: var(--neg); } .info { color: var(--info); }
 
-  .row { display: flex; gap: 10px; }
-  .row > * { flex: 1; min-width: 0; }
-  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 15px 14px; }
-  .stat-l { font-size: 10.5px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dimmer); }
-  .stat-v { font-family: var(--serif); font-size: 27px; margin-top: 8px; letter-spacing: -0.4px; white-space: nowrap; }
-  .stat-v small { font-family: 'Inter'; font-size: 12px; color: var(--dim); margin-left: 3px; letter-spacing: 0; }
-  .stat-n { font-size: 11.5px; color: var(--dim); margin-top: 4px; }
-  .stats { margin-bottom: 14px; }
+  .badge { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 100px; font-size: 12px; font-weight: 600; white-space: nowrap; flex: none; }
+  .badge.ahead, .badge.done { background: var(--pos-a); color: var(--pos); }
+  .badge.behind { background: var(--neg-a); color: var(--neg); }
+  .badge.ontrack { background: var(--gold-a); color: var(--gold); }
+  .badge.none { background: rgba(255, 255, 255, 0.06); color: var(--t2); }
 
-  .pill { white-space: nowrap; flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 100px; font-size: 11.5px; font-weight: 600; letter-spacing: 0.2px; }
-  .pill.ahead, .pill.done { background: var(--green-soft); color: var(--green); }
-  .pill.behind { background: var(--red-soft); color: var(--red); }
-  .pill.ontrack { background: var(--gold-soft); color: var(--gold); }
-  .pill.none { background: var(--line); color: var(--dim); }
-  .pill.wait { background: var(--blue-soft); color: var(--blue); }
+  /* Jauge quinzaine : un segment par jour */
+  .ticks { display: flex; gap: 3px; margin-top: 16px; height: 34px; align-items: flex-end; }
+  .tick { flex: 1; border-radius: 4px; background: rgba(255, 255, 255, 0.07); position: relative; min-height: 4px; transition: height .6s var(--ease); }
+  .tick.fill { background: linear-gradient(180deg, var(--gold-hi), var(--gold) 60%, var(--gold-lo)); }
+  .tick.today::after { content: ''; position: absolute; left: 50%; bottom: -8px; width: 4px; height: 4px; border-radius: 50%; background: var(--t1); transform: translateX(-50%); }
+  .meter { height: 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.07); margin-top: 16px; position: relative; overflow: visible; }
+  .meter > b { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--gold-lo), var(--gold), var(--gold-hi)); box-shadow: 0 0 16px rgba(246, 197, 72, 0.45); transition: width 1s var(--ease); }
+  .meter > i { position: absolute; top: -4px; width: 2px; height: 14px; border-radius: 2px; background: rgba(255, 255, 255, 0.75); }
+  .meter-l { display: flex; justify-content: space-between; font-size: 12px; color: var(--t2); margin-top: 10px; }
+  .meter-l b { color: var(--t1); font-weight: 600; }
 
-  /* ---------- Progression ---------- */
-  .prog { margin-top: 18px; }
-  .bar { height: 10px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); position: relative; overflow: visible; }
-  .bar-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #B8860B, var(--gold) 60%, var(--gold-2)); box-shadow: 0 0 18px rgba(245, 197, 66, 0.35); transition: width 1s cubic-bezier(.2, .8, .2, 1); max-width: 100%; }
-  .bar-mark { position: absolute; top: -5px; width: 2px; height: 20px; background: var(--text); opacity: 0.6; border-radius: 2px; }
-  .bar-legend { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--dim); margin-top: 10px; }
-  .bar-legend b { color: var(--text); font-weight: 600; }
+  /* Tuiles */
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 16px 0; }
+  .tile { background: var(--s1); border-radius: var(--r-lg); padding: 15px 16px; min-width: 0; }
+  .tile-i { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.07); margin-bottom: 14px; }
+  .tile-i svg { width: 15px; height: 15px; }
+  .tile-v { font-size: 22px; font-weight: 600; letter-spacing: -0.04em; white-space: nowrap; }
+  .tile-l { font-size: 12.5px; color: var(--t2); margin-top: 3px; line-height: 1.35; }
 
-  /* ---------- Lignes ---------- */
-  .list { margin-top: 10px; }
-  .li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
-  .li:first-child { border-top: 0; }
-  .li-ico { width: 36px; height: 36px; border-radius: 12px; flex: none; display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--gold-soft); color: var(--gold); }
-  .li-ico.pu { background: var(--green-soft); color: var(--green); }
-  .li-ico.rf { background: var(--blue-soft); color: var(--blue); }
-  .li-main { flex: 1; min-width: 0; }
-  .li-t { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .li-s { font-size: 11.5px; color: var(--dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .li-v { text-align: right; flex: none; }
-  .li-v .a { font-size: 14px; font-weight: 600; }
-  .li-v .b { font-size: 11px; margin-top: 3px; }
-  .st-debloquee { color: var(--green); } .st-attente { color: var(--blue); } .st-annulee { color: var(--red); } .st-x { color: var(--dim); }
-  .kv { display: flex; justify-content: space-between; align-items: baseline; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
-  .kv:first-of-type { border-top: 0; }
-  .kv .k { color: var(--dim); }
-  .kv .v { font-weight: 600; }
-  .kv.total { border-top: 1px solid var(--line-2); padding-top: 14px; }
-  .kv.total .k { color: var(--text); font-weight: 600; }
-  .kv.total .v { font-family: var(--serif); font-size: 26px; font-weight: 400; color: var(--gold); }
-  .tag { font-size: 10.5px; padding: 3px 8px; border-radius: 100px; background: var(--gold-soft); color: var(--gold); margin-left: 6px; font-weight: 600; vertical-align: 1px; }
+  /* ---------- Liste façon relevé ---------- */
+  .group-h { font-size: 13px; font-weight: 600; color: var(--t2); padding: 18px 0 6px; display: flex; justify-content: space-between; }
+  .group-h:first-child { padding-top: 8px; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+  .ava { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 600; flex: none; position: relative; background: var(--s3); color: var(--t1); }
+  .ava .b { position: absolute; right: -2px; bottom: -2px; width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid var(--s1); font-size: 7.5px; font-weight: 700; display: grid; place-items: center; color: #000; }
+  .b-ax { background: var(--gold); } .b-pu { background: var(--pos); } .b-rf { background: var(--info); }
+  .row-m { flex: 1; min-width: 0; }
+  .row-t { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.015em; }
+  .row-s { font-size: 13px; color: var(--t2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-v { text-align: right; flex: none; }
+  .row-a { font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+  .row-b { font-size: 12px; margin-top: 2px; }
+  .strike { text-decoration: line-through; color: var(--t3); }
+  .seg { display: flex; background: rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 3px; gap: 2px; margin-top: 14px; }
+  .seg button { flex: 1; height: 30px; border-radius: 9px; font-size: 12.5px; font-weight: 500; color: var(--t2); transition: all .2s var(--ease); }
+  .seg button.on { background: var(--s3); color: var(--t1); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); }
+  .seg.mini { margin-top: 0; display: inline-flex; }
+  .seg.mini button { flex: none; padding: 0 10px; height: 26px; font-size: 12px; }
+  .more { display: block; width: 100%; height: 44px; margin-top: 6px; border-radius: 14px; background: rgba(255, 255, 255, 0.05); font-size: 14px; font-weight: 500; }
+  .empty { text-align: center; color: var(--t2); font-size: 14px; padding: 26px 0 10px; }
+
+  /* ---------- Relevé de rémunération ---------- */
+  .stmt { margin-top: 14px; }
+  .stmt-r { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 15px; }
+  .stmt-r + .stmt-r { border-top: 1px solid var(--hair); }
+  .stmt-r .k { color: var(--t2); display: flex; align-items: center; gap: 10px; }
+  .stmt-r .k i { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.06); font-style: normal; font-size: 13px; }
+  .stmt-r .v { font-weight: 600; }
+  .stmt-sub { font-size: 12px; color: var(--t3); margin: -6px 0 6px 38px; line-height: 1.5; }
+  .payout { margin-top: 10px; border-radius: var(--r-lg); padding: 18px; position: relative; overflow: hidden;
+    background: radial-gradient(120% 140% at 0% 0%, rgba(255, 227, 154, 0.22), transparent 55%), linear-gradient(135deg, #2A2107, #15110A 60%, #0E0C08); border: 1px solid rgba(246, 197, 72, 0.22); }
+  .payout-l { font-size: 13px; color: rgba(255, 227, 154, 0.8); font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .payout-v { font-size: 38px; font-weight: 600; letter-spacing: -0.05em; margin-top: 6px; color: var(--gold-hi); }
+  .payout-v .c { font-size: 0.5em; color: rgba(255, 227, 154, 0.7); margin-left: 3px; font-weight: 500; }
+  .payout-n { font-size: 12.5px; color: rgba(255, 227, 154, 0.65); margin-top: 6px; }
+  .pill-s { font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 100px; background: rgba(246, 197, 72, 0.18); color: var(--gold-hi); }
+
+  /* ---------- Funnel ---------- */
+  .fun { margin-top: 14px; display: flex; flex-direction: column; align-items: center; }
+  .fun-s { width: 100%; border-radius: 18px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.04); position: relative; overflow: hidden; }
+  .fun-s .bg { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, rgba(246, 197, 72, 0.22), rgba(246, 197, 72, 0.06)); border-right: 1px solid rgba(246, 197, 72, 0.35); }
+  .fun-s .l { position: relative; font-size: 14px; color: var(--t2); }
+  .fun-s .l b { display: block; color: var(--t1); font-size: 22px; font-weight: 600; letter-spacing: -0.04em; margin-top: 2px; }
+  .fun-s .r { position: relative; font-size: 12px; color: var(--t2); text-align: right; max-width: 48%; line-height: 1.4; }
+  .fun-c { font-size: 12px; font-weight: 600; color: var(--gold); padding: 6px 12px; margin: 4px 0; border-radius: 100px; background: var(--gold-a); display: inline-flex; align-items: center; gap: 6px; }
+  .note { display: flex; gap: 12px; align-items: flex-start; margin: 12px 16px 0; padding: 14px 16px; border-radius: var(--r-lg); background: var(--s1); font-size: 13.5px; line-height: 1.45; color: var(--t2); }
+  .note b { color: var(--t1); font-weight: 600; }
+  .note .ni { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; }
+  .note .ni.w { background: var(--neg-a); color: var(--neg); }
+  .note .ni.i { background: var(--info-a); color: var(--info); }
+  .note .ni svg { width: 15px; height: 15px; }
 
   /* ---------- Graphiques ---------- */
   .chart { margin-top: 16px; }
-  .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-  .chart .axis { font-size: 9px; fill: var(--dimmer); font-family: 'Inter'; }
-  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--dim); margin-top: 12px; }
-  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 3px; margin-right: 6px; vertical-align: 0; }
-  .tip { position: fixed; z-index: 50; pointer-events: none; background: #0B1020; border: 1px solid var(--line-2); border-radius: 12px; padding: 9px 12px; font-size: 12px; line-height: 1.5; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity .12s; white-space: nowrap; }
-  .tip b { color: var(--gold); }
-
-  /* ---------- Funnel ---------- */
-  .steps { margin-top: 14px; }
-  .step { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 13px 0; border-top: 1px solid var(--line); }
-  .step:first-child { border-top: 0; }
-  .step-t { font-size: 13.5px; color: var(--dim); }
-  .step-v { font-family: var(--serif); font-size: 24px; text-align: right; }
-  .step-bar { grid-column: 1 / -1; height: 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.05); overflow: hidden; }
-  .step-bar > div { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #B8860B, var(--gold)); }
-  .step-r { grid-column: 1 / -1; font-size: 11.5px; color: var(--dimmer); }
-  .warn { display: flex; gap: 10px; align-items: flex-start; background: var(--red-soft); border: 1px solid rgba(255, 92, 108, 0.25); color: #FFC2C8; border-radius: 16px; padding: 13px 14px; font-size: 13px; line-height: 1.45; margin-bottom: 14px; }
-  .warn.soft { background: var(--blue-soft); border-color: rgba(122, 162, 255, 0.25); color: #CFDDFF; }
-  .warn .ic { flex: none; font-size: 15px; line-height: 1.2; }
-
-  /* ---------- Tableaux ---------- */
-  .seg { display: inline-flex; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 2px; }
-  .seg button { padding: 6px 11px; border-radius: 9px; font-size: 12px; color: var(--dim); font-weight: 500; }
-  .seg button.on { background: var(--line-2); color: var(--text); }
-  .tbl { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
-  .tbl th { text-align: right; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--dimmer); font-weight: 600; padding: 8px 4px; }
-  .tbl th:first-child, .tbl td:first-child { text-align: left; }
-  .tbl td { text-align: right; padding: 11px 4px; border-top: 1px solid var(--line); white-space: nowrap; }
-  .tbl td.g { color: var(--gold); font-weight: 600; }
-  .tbl tr.cur td { background: rgba(245, 197, 66, 0.04); }
+  .chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .ax { font-size: 10px; fill: var(--t3); font-family: 'Geist', sans-serif; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--t2); margin-top: 12px; }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .tip { position: fixed; z-index: 60; pointer-events: none; background: rgba(28, 28, 32, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-radius: 14px; padding: 10px 12px; font-size: 12.5px; line-height: 1.5; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity .12s; white-space: nowrap; }
+  .tip b { color: var(--gold); font-weight: 600; }
 
   /* ---------- Agence ---------- */
-  .pcard { display: block; width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-top: 10px; }
-  .pcard-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .pcard-n { font-family: var(--serif); font-size: 22px; }
-  .pcard-b { display: block; font-size: 11px; color: var(--dimmer); margin-top: 2px; letter-spacing: 0.3px; }
-  .pcard-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-top: 10px; }
-  .pcard-row b { color: var(--text); font-weight: 600; }
-  .pcard .bar { height: 6px; margin-top: 10px; }
-  .anom { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
-  .anom:first-child { border-top: 0; }
-  .anom-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: none; }
-  .anom-dot.g3 { background: var(--red); } .anom-dot.g2 { background: var(--gold); }
-  .anom-t { font-size: 13.5px; font-weight: 500; }
-  .anom-s { font-size: 12px; color: var(--dim); margin-top: 3px; line-height: 1.4; }
-  .more { width: 100%; padding: 12px; margin-top: 6px; font-size: 12.5px; color: var(--gold); font-weight: 600; border-top: 1px solid var(--line); }
+  .carousel { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 16px 4px; margin-top: 18px; scrollbar-width: none; scroll-padding: 0 16px; }
+  .carousel::-webkit-scrollbar { display: none; }
+  .pc { flex: 0 0 78%; scroll-snap-align: start; border-radius: var(--r-xl); padding: 18px; text-align: left; position: relative; overflow: hidden; min-height: 170px; display: flex; flex-direction: column; justify-content: space-between;
+    background: radial-gradient(120% 120% at 100% 0%, rgba(246, 197, 72, 0.18), transparent 55%), var(--s1); border: 1px solid var(--hair); }
+  .pc:nth-child(2) { background: radial-gradient(120% 120% at 100% 0%, rgba(110, 168, 255, 0.16), transparent 55%), var(--s1); }
+  .pc:nth-child(3) { background: radial-gradient(120% 120% at 100% 0%, rgba(61, 220, 151, 0.14), transparent 55%), var(--s1); }
+  .pc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .pc-n { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+  .pc-b { font-size: 12.5px; color: var(--t2); margin-top: 2px; }
+  .pc-v { font-size: 30px; font-weight: 600; letter-spacing: -0.05em; margin-top: 18px; }
+  .pc-v .c { font-size: 0.5em; color: var(--t2); margin-left: 2px; font-weight: 500; }
+  .pc-f { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--t2); margin-top: 6px; }
+  .pc .meter { margin-top: 12px; height: 4px; }
+  .an { display: flex; gap: 12px; padding: 12px 0; }
+  .an + .an { border-top: 1px solid var(--hair); }
+  .an-i { width: 34px; height: 34px; border-radius: 50%; flex: none; display: grid; place-items: center; }
+  .an-i svg { width: 15px; height: 15px; }
+  .an-i.g3 { background: var(--neg-a); color: var(--neg); }
+  .an-i.g2 { background: var(--gold-a); color: var(--gold); }
+  .an-t { font-size: 14.5px; font-weight: 500; display: flex; justify-content: space-between; gap: 8px; }
+  .an-s { font-size: 12.5px; color: var(--t2); margin-top: 3px; line-height: 1.45; }
+
+  /* ---------- Tableau historique ---------- */
+  .hrow { display: grid; grid-template-columns: 1.1fr 1fr 0.6fr 1fr; gap: 6px; align-items: center; padding: 12px 0; font-size: 14px; }
+  .hrow.a4 { grid-template-columns: 1fr 1fr 0.5fr 0.9fr 0.9fr; }
+  .hrow + .hrow { border-top: 1px solid var(--hair); }
+  .hrow > :not(:first-child) { text-align: right; }
+  .hrow.head { font-size: 11.5px; color: var(--t3); padding: 4px 0 8px; font-weight: 500; }
+  .hrow.cur { color: var(--gold-hi); }
 
   /* ---------- Navigation ---------- */
-  .nav { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 20; display: flex; gap: 4px; padding: 6px; border-radius: 22px; background: rgba(13, 18, 34, 0.82); border: 1px solid var(--line-2); backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55); width: min(440px, calc(100% - 28px)); }
-  .nav button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 9px 4px 8px; border-radius: 16px; font-size: 10.5px; font-weight: 500; color: var(--dimmer); transition: color .2s, background .2s; }
-  .nav button svg { width: 20px; height: 20px; }
-  .nav button.on { color: var(--gold); background: var(--gold-soft); }
+  .nav { position: fixed; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 40; width: min(400px, calc(100% - 32px));
+    display: flex; padding: 6px; gap: 2px; border-radius: 26px; background: rgba(22, 22, 25, 0.72); backdrop-filter: blur(28px) saturate(1.6); -webkit-backdrop-filter: blur(28px) saturate(1.6);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.07); }
+  .nav button { flex: 1; height: 54px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10.5px; font-weight: 500; color: var(--t3); transition: color .2s, background .25s var(--ease); }
+  .nav button svg { width: 22px; height: 22px; }
+  .nav button.on { color: var(--t1); background: rgba(255, 255, 255, 0.08); }
+  .nav button.on svg { color: var(--gold); }
 
-  .page { display: none; animation: rise .35s cubic-bezier(.2, .8, .2, 1); }
-  .page.on { display: block; }
-  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-
-  .skel { color: transparent !important; background: linear-gradient(90deg, var(--line) 0%, var(--line-2) 50%, var(--line) 100%); background-size: 200% 100%; animation: sh 1.4s infinite; border-radius: 10px; }
+  .page { display: none; }
+  .page.on { display: block; animation: in .45s var(--ease); }
+  @keyframes in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .sk { background: linear-gradient(90deg, var(--s1), var(--s2), var(--s1)); background-size: 200% 100%; animation: sh 1.3s infinite; border-radius: var(--r-xl); }
   @keyframes sh { to { background-position: -200% 0; } }
-  .empty { text-align: center; color: var(--dim); font-size: 13px; padding: 22px 0 8px; }
-  .foot { text-align: center; font-size: 11px; color: var(--dimmer); margin-top: 22px; line-height: 1.6; }
-  .err { text-align: center; padding: 70px 20px; }
-  .err h2 { font-family: var(--serif); font-weight: 400; font-size: 32px; margin-bottom: 10px; }
-  .err p { color: var(--dim); font-size: 14px; line-height: 1.5; }
-  .banner { font-size: 12px; color: var(--dim); text-align: center; margin: -10px 0 14px; }
-  .banner.stale { color: var(--gold); }
+  .foot { text-align: center; font-size: 11.5px; color: var(--t3); margin-top: 26px; line-height: 1.6; padding: 0 16px; }
+  .err { text-align: center; padding: 90px 28px; }
+  .err h2 { font-size: 24px; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 10px; }
+  .err p { color: var(--t2); font-size: 15px; line-height: 1.5; }
+  .stale { margin: 10px 16px 0; text-align: center; font-size: 12.5px; color: var(--gold); }
+
+  @media (min-width: 760px) {
+    .app { max-width: 920px; }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+    .pc { flex-basis: 300px; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
-  <header class="top">
-    <div class="brand">
-      <div class="avatar" id="avatar">·</div>
-      <div class="who">
-        <div class="who-name" id="who-name">Chargement</div>
-        <div class="who-sub" id="who-sub"><span class="live-dot off"></span>Connexion aux données…</div>
-      </div>
-    </div>
-    <button class="icon-btn" id="refresh" aria-label="Actualiser" onclick="load(true)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-    </button>
+<div class="aura"></div>
+<div class="app">
+  <header class="bar-top">
+    <div class="avatar" id="avatar">·</div>
+    <div class="who"><div class="who-n" id="who-n">Chargement</div><div class="who-s" id="who-s"><span class="dot off"></span>Connexion…</div></div>
+    <button class="round" id="refresh" aria-label="Actualiser" onclick="load(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
   </header>
-  <div id="chips" class="chips" hidden></div>
-  <div id="banner" class="banner" hidden></div>
+  <div class="tabs" id="tabs" hidden></div>
+  <div class="stale" id="stale" hidden></div>
   <main id="pages">
-    <section class="page on" data-page="agence" id="p-agence"></section>
-    <section class="page" data-page="jour" id="p-jour">
-      <div class="card hero"><div class="eyebrow">Aujourd'hui</div><div class="big skel">0 000</div><div class="sub skel">&nbsp;</div></div>
-      <div class="row stats"><div class="stat skel" style="height:96px"></div><div class="stat skel" style="height:96px"></div></div>
-      <div class="card skel" style="height:220px"></div>
+    <section class="page" data-page="agence" id="p-agence"></section>
+    <section class="page on" data-page="jour" id="p-jour">
+      <div class="hero"><div class="sk" style="width:120px;height:14px;margin:0 auto"></div><div class="sk" style="width:220px;height:56px;margin:14px auto 0"></div></div>
+      <div class="sk" style="height:120px;margin:22px 16px 0"></div><div class="sk" style="height:200px;margin:12px 16px 0"></div>
     </section>
     <section class="page" data-page="mois" id="p-mois"></section>
     <section class="page" data-page="funnel" id="p-funnel"></section>
@@ -243,11 +289,11 @@
 </div>
 
 <nav class="nav" id="nav">
-  <button data-go="agence" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>Agence</button>
-  <button data-go="jour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Aujourd'hui</button>
-  <button data-go="mois"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Mois</button>
-  <button data-go="funnel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg>Funnel</button>
-  <button data-go="histo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Historique</button>
+  <button data-go="agence" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2.2"/></svg>Agence</button>
+  <button data-go="jour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+  <button data-go="mois"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Mois</button>
+  <button data-go="funnel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/></svg>Funnel</button>
+  <button data-go="histo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V11M10 19V5M16 19v-6M21 19H3"/></svg>Historique</button>
 </nav>
 <div class="tip" id="tip"></div>
 
@@ -259,407 +305,424 @@ const Q = new URLSearchParams(location.search);
 const ADMIN = Q.get('admin');
 const TOKEN = Q.get('p');
 const API = '/api/data' + (ADMIN ? '?admin=' + encodeURIComponent(ADMIN) : TOKEN ? '?p=' + encodeURIComponent(TOKEN) : '');
-const CACHE_KEY = 'bena_v2:' + (ADMIN ? 'agence' : (TOKEN || 'defaut'));
+const CACHE_KEY = 'bena_v3:' + (ADMIN ? 'agence' : (TOKEN || 'defaut'));
 const REFRESH_MS = 60000;
-const S = { data: null, view: null, page: ADMIN ? 'agence' : 'jour', partnerIdx: -1, depFilter: 'tous', depLimit: 12, histoMode: 'mois', funnelDays: 14, anomLimit: 6, stale: false };
+const S = { data: null, page: ADMIN ? 'agence' : 'jour', pi: 0, depFilter: 'tous', depLimit: 10, histo: 'mois', fDays: 14, anomLimit: 5, stale: false, staleAt: 0 };
 
 // ============================================================================
 // FORMATS
 // ============================================================================
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-const MOIS_C = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
-const JOURS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+const MC = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const n0 = n => Math.round(n || 0).toLocaleString('fr-FR').replace(/ | /g, ' ');
-const money = n => '$' + n0(n);
-const bigMoney = n => '<span class="cur">$</span>' + n0(n);
-const pctf = n => (isFinite(n) ? Math.round(n) : 0) + ' %';
-const dParts = s => s.split('-').map(Number);
-const dObj = s => { const [y, m, d] = dParts(s); return new Date(y, m - 1, d); };
-const dShort = s => { const [, m, d] = dParts(s); return d + ' ' + MOIS_C[m - 1]; };
-const dDay = s => { const o = dObj(s); return JOURS[o.getDay()] + ' ' + o.getDate() + ' ' + MOIS_C[o.getMonth()]; };
-const dNum = s => { const [, m, d] = dParts(s); return String(d).padStart(2, '0') + '/' + String(m).padStart(2, '0'); };
-const monthName = key => { const [y, m] = key.split('-').map(Number); return MOIS[m - 1] + ' ' + y; };
-const monthShort = key => { const [, m] = key.split('-').map(Number); return MOIS_C[m - 1]; };
-const daysAgo = (a, b) => Math.round((dObj(b) - dObj(a)) / 86400000);
-const brokerIco = b => b === 'PUPrime' ? '<div class="li-ico pu">PU</div>' : b === 'RaiseFX' ? '<div class="li-ico rf">RF</div>' : '<div class="li-ico">AX</div>';
+const money = n => n0(n) + ' $';
+const amt = n => n0(n) + '<span class="c">$</span>';
+const P = s => s.split('-').map(Number);
+const D = s => { const [y, m, d] = P(s); return new Date(y, m - 1, d); };
+const dS = s => { const [, m, d] = P(s); return d + ' ' + MC[m - 1]; };
+const dL = s => { const o = D(s); return JOURS[o.getDay()] + ' ' + o.getDate() + ' ' + MOIS[o.getMonth()]; };
+const dN = s => { const [, m, d] = P(s); return String(d).padStart(2, '0') + '/' + String(m).padStart(2, '0'); };
+const mName = k => { const [y, m] = k.split('-').map(Number); return MOIS[m - 1] + ' ' + y; };
+const mCap = k => { const t = mName(k); return t.charAt(0).toUpperCase() + t.slice(1); };
+const gap = (a, b) => Math.round((D(b) - D(a)) / 86400000);
 const short = n => String(n || '').replace(/\s*\(.*\)\s*/, '').trim() || n;
-const brandOf = n => { const m = String(n || '').match(/\((.*)\)/); return m ? m[1] : ''; };
-const statusTxt = { debloquee: 'Débloquée', attente: 'En attente', annulee: 'Annulée' };
-const pillArrow = { ahead: '↑', behind: '↓', ontrack: '→', done: '★', none: '·' };
-function pill(st) {
-  if (!st) return '';
-  const diff = st.code === 'ahead' || st.code === 'behind' ? ' ' + Math.round(Math.abs(st.diff)) + ' pts' : '';
-  return '<span class="pill ' + st.code + '">' + pillArrow[st.code] + ' ' + esc(st.label) + diff + '</span>';
-}
+const brand = n => { const m = String(n || '').match(/\((.*)\)/); return m ? m[1] : ''; };
+const initials = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0).toUpperCase()).join('') || '?';
+const ST = { debloquee: ['Débloquée', 'pos'], attente: ['En attente', 'info'], annulee: ['Annulée', 'neg'] };
+const ARROW = { ahead: '↑', behind: '↓', ontrack: '→', done: '✓', none: '·' };
+const badge = st => !st ? '' : '<span class="badge ' + st.code + '">' + ARROW[st.code] + ' ' + esc(st.label) + (st.code === 'ahead' || st.code === 'behind' ? ' · ' + Math.round(Math.abs(st.diff)) + ' pts' : '') + '</span>';
+const I = {
+  bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
+  trend: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9.5"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
+  funnel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/></svg>',
+  bars: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V11M10 19V5M16 19v-6M21 19H3"/></svg>'
+};
 
 // ============================================================================
 // CHARGEMENT
 // ============================================================================
 function readCache() { try { const c = JSON.parse(localStorage.getItem(CACHE_KEY)); return c && c.data ? c : null; } catch (e) { return null; } }
-function writeCache(data) { try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data })); } catch (e) {} }
+function writeCache(d) { try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: d })); } catch (e) {} }
 
-async function load(manual) {
+async function load() {
   const btn = document.getElementById('refresh');
   btn.classList.add('spin');
   try {
     const res = await fetch(API, { cache: 'no-store' });
     const json = await res.json();
-    if (!res.ok) throw Object.assign(new Error(json.error || 'Erreur'), { status: res.status, detail: json.detail });
-    S.data = json; S.stale = false; writeCache(json);
-    render();
+    if (!res.ok) throw Object.assign(new Error(json.error || 'Erreur'), { status: res.status });
+    S.data = json; S.stale = false; writeCache(json); render();
   } catch (e) {
     const c = readCache();
-    if (c && !S.data) { S.data = c.data; S.stale = true; S.staleAt = c.at; render(); }
-    else if (S.data) { S.stale = true; S.staleAt = S.staleAt || Date.now(); renderHeader(); }
-    else showError(e);
-  } finally { setTimeout(() => btn.classList.remove('spin'), 300); }
+    if (S.data) { S.stale = true; S.staleAt = S.staleAt || Date.now(); header(); }
+    else if (c) { S.data = c.data; S.stale = true; S.staleAt = c.at; render(); }
+    else fail(e);
+  } finally { setTimeout(() => btn.classList.remove('spin'), 350); }
 }
 
-function showError(e) {
-  document.getElementById('pages').innerHTML = '<div class="err"><h2>' + (e.status === 404 ? 'Lien inconnu' : e.status === 403 ? 'Accès refusé' : 'Données indisponibles') + '</h2><p>' +
-    (e.status === 404 ? 'Ce lien ne correspond à aucun partenaire actif. Demande ton lien à jour à Paul.' :
-     e.status === 403 ? 'La clé de cet espace n\'est pas valide.' :
-     'Impossible de lire les données pour le moment. Réessaie dans un instant.') + '</p></div>';
+function fail(e) {
+  const t = e.status === 404 ? ['Lien inconnu', 'Ce lien ne correspond à aucun partenaire actif. Demande ton lien à jour à Paul.']
+    : e.status === 403 ? ['Accès refusé', 'La clé de cet espace n\'est pas valide.']
+    : ['Données indisponibles', 'Impossible de lire les chiffres pour le moment. Réessaie dans un instant.'];
+  document.getElementById('pages').innerHTML = '<div class="err"><h2>' + t[0] + '</h2><p>' + t[1] + '</p></div>';
   document.getElementById('nav').hidden = true;
-  document.getElementById('who-name').textContent = 'Dashboard';
-  document.getElementById('who-sub').innerHTML = '<span class="live-dot off"></span>Hors ligne';
+  document.getElementById('who-n').textContent = 'Dashboard';
+  document.getElementById('who-s').innerHTML = '<span class="dot off"></span>Hors ligne';
 }
 
 // ============================================================================
 // RENDU
 // ============================================================================
-function current() {
-  const d = S.data;
-  if (!d) return null;
-  if (d.mode === 'agence') return S.partnerIdx >= 0 ? d.partners[S.partnerIdx] : null;
-  return d;
-}
+const isAgency = () => S.data && S.data.mode === 'agence';
+const cur = () => isAgency() ? S.data.partners[S.pi] : S.data;
 
 function render() {
+  if (!S.data) return;
+  document.querySelector('[data-go="agence"]').hidden = !isAgency();
+  if (isAgency()) agency();
+  const p = cur();
+  if (p) { home(p); month(p); funnel(p); histo(p); }
+  show(S.page, true);
   const d = S.data;
-  const isAgency = d.mode === 'agence';
-  document.querySelector('[data-go="agence"]').hidden = !isAgency;
-  if (isAgency && S.partnerIdx < 0 && S.page !== 'agence') S.partnerIdx = 0;
-  renderHeader();
-  renderChips();
-  if (isAgency) renderAgency();
-  const p = current() || (isAgency ? d.partners[0] : null);
-  if (p) { renderJour(p, isAgency); renderMois(p, isAgency); renderFunnel(p); renderHisto(p, isAgency); }
-  go(S.page, true);
-  document.getElementById('foot').innerHTML = 'Mis à jour ' + new Date(d.generatedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) +
-    ' · CA = commissions débloquées<br>Lecture ' + (d.source === 'privé' ? 'sécurisée (compte de service)' : 'publique') ;
+  document.getElementById('foot').innerHTML = 'Actualisé à ' + new Date(d.generatedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + ' · CA = commissions débloquées';
 }
 
-function renderHeader() {
-  const d = S.data;
-  const isAgency = d.mode === 'agence';
-  const p = current();
-  const name = isAgency && S.page === 'agence' ? 'Incubeo' : (p ? p.partner.name : 'Incubeo');
-  document.getElementById('who-name').textContent = name;
-  document.getElementById('avatar').textContent = name.charAt(0).toUpperCase();
+function header() {
+  const d = S.data, p = cur(), ag = isAgency() && S.page === 'agence';
+  const name = ag ? 'Incubeo' : short(p.partner.name);
+  document.getElementById('who-n').textContent = name;
+  document.getElementById('avatar').textContent = initials(name).charAt(0);
   document.title = name + ' — Dashboard';
-  const today = d.today;
-  document.getElementById('who-sub').innerHTML = '<span class="live-dot' + (S.stale ? ' off' : '') + '"></span>' +
-    (isAgency && S.page === 'agence' ? 'Espace agence · ' : '') + dDay(today);
-  const b = document.getElementById('banner');
-  if (S.stale) { b.hidden = false; b.className = 'banner stale'; b.textContent = 'Hors ligne — chiffres du ' + new Date(S.staleAt).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
-  else b.hidden = true;
-}
-
-function renderChips() {
-  const d = S.data, el = document.getElementById('chips');
-  if (d.mode !== 'agence' || S.page === 'agence') { el.hidden = true; return; }
-  el.hidden = false;
-  el.innerHTML = d.partners.map((p, i) => '<button class="chip' + (i === S.partnerIdx ? ' on' : '') + '" data-pi="' + i + '">' + esc(short(p.partner.name)) + '</button>').join('');
-  el.querySelectorAll('[data-pi]').forEach(b => b.onclick = () => { S.partnerIdx = +b.dataset.pi; S.depLimit = 12; render(); window.scrollTo({ top: 0 }); });
-}
-
-// ---------- AUJOURD'HUI ----------
-function renderJour(p, isAgency) {
-  const j = p.jour, q = p.quinzaine;
-  const prog = q.objectif ? Math.min(100, q.ca / q.objectif * 100) : 0;
-  const expected = q.ecoules / q.jours * 100;
-  const deltaHier = j.ca - j.hier;
-  let html = '';
-  html += '<div class="card hero">' +
-    '<div class="eyebrow">Aujourd\'hui <span class="r">' + dDay(p.today) + '</span></div>' +
-    '<div class="big">' + bigMoney(j.ca) + '</div>' +
-    '<div class="sub">' + (j.depots.filter(x => x.statut === 'debloquee').length) + ' dépôt(s) débloqué(s) · hier <b>' + money(j.hier) + '</b>' +
-    (j.ca || j.hier ? ' <span style="color:' + (deltaHier >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (deltaHier >= 0 ? '+' : '−') + money(Math.abs(deltaHier)) + '</span>' : '') +
-    (j.attente ? '<br><span class="st-attente">+ ' + money(j.attente) + ' en attente de validation</span>' : '') + '</div>' +
-    '</div>';
-
-  html += '<div class="card">' +
-    '<div class="eyebrow">Quinzaine · ' + dShort(q.start) + ' → ' + dShort(q.end) + ' ' + pill(q.statut) + '</div>' +
-    '<div style="display:flex;align-items:baseline;gap:10px;margin-top:14px"><div class="mid">' + bigMoney(q.ca) + '</div><div style="color:var(--dim);font-size:13px">/ ' + money(q.objectif) + '</div></div>' +
-    '<div class="prog"><div class="bar"><div class="bar-fill" style="width:' + prog + '%"></div><div class="bar-mark" style="left:calc(' + Math.min(100, expected) + '% - 1px)"></div></div>' +
-    '<div class="bar-legend"><span><b>' + pctf(q.ca / (q.objectif || 1) * 100) + '</b> de l\'objectif</span><span>Jour ' + q.ecoules + ' / ' + q.jours + '</span></div></div>' +
-    '</div>';
-
-  html += '<div class="row stats">' +
-    stat('Il faut / jour', money(q.rythmeNecessaire), q.ca >= q.objectif ? 'Objectif atteint' : 'pour finir à ' + money(q.objectif)) +
-    stat('Projection', money(q.projection), 'au rythme actuel') + '</div>';
-  html += '<div class="row stats">' +
-    stat('Dépôts', q.depots + '', 'débloqués sur la quinzaine') +
-    stat('En attente', money(q.attente), q.attente ? 'non comptés dans le CA' : 'rien en attente') + '</div>';
-  if (isAgency) {
-    html += '<div class="card flat"><div class="eyebrow">Encaissement de cette quinzaine</div>' +
-      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:12px"><div class="mid">' + bigMoney(q.ca) + '</div><div style="color:var(--dim);font-size:13px">le ' + dDay(q.encaissement) + '</div></div>' +
-      '<div class="sub">Montant à date, payé par les brokers. Il évoluera jusqu\'au ' + dShort(q.end) + '.</div></div>';
+  document.getElementById('who-s').innerHTML = '<span class="dot' + (S.stale ? ' off' : '') + '"></span>' + (ag ? 'Espace agence' : (brand(p.partner.name) || 'Partenaire'));
+  const st = document.getElementById('stale');
+  st.hidden = !S.stale;
+  if (S.stale) st.textContent = 'Hors ligne · chiffres du ' + new Date(S.staleAt).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const tabs = document.getElementById('tabs');
+  tabs.hidden = !(isAgency() && !ag);
+  if (!tabs.hidden) {
+    tabs.innerHTML = d.partners.map((x, i) => '<button class="tab' + (i === S.pi ? ' on' : '') + '" data-pi="' + i + '">' + esc(short(x.partner.name)) + '</button>').join('');
+    tabs.querySelectorAll('[data-pi]').forEach(b => b.onclick = () => { S.pi = +b.dataset.pi; S.depLimit = 10; render(); scrollTo({ top: 0, behavior: 'smooth' }); });
   }
-  html += depositsCard(p);
-  document.getElementById('p-jour').innerHTML = html;
-  bindDeposits(p, isAgency);
 }
 
-function stat(l, v, n) { return '<div class="stat"><div class="stat-l">' + l + '</div><div class="stat-v">' + v + '</div><div class="stat-n">' + n + '</div></div>'; }
+// ---------- ACCUEIL ----------
+function home(p) {
+  const m = p.mois, q = p.quinzaine, j = p.jour, ag = isAgency();
+  const expectedQ = Math.round(q.objectif / q.jours * q.ecoules);
+  let h = '';
+  h += '<div class="hero">' +
+    '<div class="hero-l">CA de ' + MOIS[P(m.start)[1] - 1] + ' · débloqué</div>' +
+    '<div><div class="amount">' + amt(m.ca) + '</div></div>' +
+    '<div><span class="hero-chip"><i></i>' + Math.round(m.ca / (m.objectif || 1) * 100) + ' % de ' + money(m.objectif) + '</span></div>' +
+    '</div>' +
+    '<div class="spark" id="spark"></div>' +
+    '<div class="spark-legend"><span>' + dS(p.funnel.jours[0].date) + '</span><span>CA par jour · 30 jours</span><span>Aujourd\'hui</span></div>';
 
-function depositsCard(p) {
-  const f = S.depFilter;
-  const all = p.depots.filter(x => f === 'tous' || x.statut === f);
-  const list = all.slice(0, S.depLimit);
-  return '<div class="card" id="dep-card"><div class="eyebrow">Derniers dépôts <span class="r">' + all.length + '</span></div><div class="seg" style="margin-top:12px">' +
-    ['tous', 'debloquee', 'attente', 'annulee'].map(k => '<button data-df="' + k + '" class="' + (f === k ? 'on' : '') + '">' + (k === 'tous' ? 'Tous' : k === 'debloquee' ? 'Débloqués' : k === 'attente' ? 'Attente' : 'Annulés') + '</button>').join('') +
-    '</div><div class="list">' +
-    (list.length ? list.map(x => '<div class="li">' + brokerIco(x.broker) +
-      '<div class="li-main"><div class="li-t">' + esc(x.name) + '</div><div class="li-s">' + dShort(x.date) + ' · ' + esc(x.broker) + (x.depot ? ' · dépôt ' + money(x.depot) : '') + (x.setter ? ' · ' + esc(x.setter) : '') + '</div></div>' +
-      '<div class="li-v"><div class="a">' + money(x.commission) + '</div><div class="b st-' + (x.statut || 'x') + '">' + esc(statusTxt[x.statut] || x.statutLabel || '—') + '</div></div></div>').join('')
-      : '<div class="empty">Aucun dépôt</div>') +
-    '</div>' + (all.length > list.length ? '<button class="more" data-more="1">Voir plus (' + (all.length - list.length) + ')</button>' : '') + '</div>';
+  h += '<div class="actions">' +
+    act('jour-today', I.bolt, 'Aujourd\'hui', money(j.ca)) +
+    act('mois', I.cal, 'Ma part', money(m.partner)) +
+    act('funnel', I.funnel, 'Funnel', p.funnel.membres ? n0(p.funnel.membres) + ' membres' : m.depots + ' dépôts') +
+    act('histo', I.bars, 'Historique', MC[P(m.precedent.key + '-01')[1] - 1] + ' ' + money(m.precedent.ca)) +
+    '</div>';
+
+  // Quinzaine
+  h += '<div class="card"><div class="card-h"><div><div class="card-t">Quinzaine en cours</div><div class="card-s">' + dS(q.start) + ' – ' + dS(q.end) + ' · jour ' + q.ecoules + ' sur ' + q.jours + '</div></div>' + badge(q.statut) + '</div>' +
+    '<div style="display:flex;align-items:baseline;gap:8px;margin-top:16px"><div class="big">' + amt(q.ca) + '</div><div class="mute" style="font-size:14px">sur ' + money(q.objectif) + '</div></div>' +
+    ticks(q) +
+    '<div class="meter-l" style="margin-top:14px"><span>Attendu à date <b>' + money(expectedQ) + '</b></span><span>Projection <b>' + money(q.projection) + '</b></span></div></div>';
+
+  h += '<div class="tiles">' +
+    tile(I.target, money(q.rythmeNecessaire), q.ca >= q.objectif ? 'Objectif atteint' : 'par jour pour l\'objectif') +
+    tile(I.clock, money(q.attente), q.attente ? 'en attente, hors CA' : 'aucun dépôt en attente') +
+    '</div>';
+
+  if (ag) {
+    h += '<div class="card"><div class="payout" style="margin-top:0"><div class="payout-l"><span>Encaissement broker</span><span class="pill-s">' + dS(q.encaissement) + '</span></div>' +
+      '<div class="payout-v">' + amt(q.ca) + '</div><div class="payout-n">Quinzaine ' + dS(q.start) + ' – ' + dS(q.end) + ' · montant à date</div></div></div>';
+  }
+  h += '<div class="card" id="dep"></div>';
+  document.getElementById('p-jour').innerHTML = h;
+  deposits(p);
+  document.querySelectorAll('#p-jour [data-act]').forEach(b => b.onclick = () => {
+    const t = b.dataset.act;
+    if (t === 'jour-today') document.getElementById('dep').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else show(t);
+  });
+  spark(p);
+  tips(document.getElementById('p-jour'));
 }
-function bindDeposits(p, isAgency) {
-  const card = document.getElementById('dep-card');
-  card.querySelectorAll('[data-df]').forEach(b => b.onclick = () => { S.depFilter = b.dataset.df; S.depLimit = 12; renderJour(p, isAgency); });
-  const m = card.querySelector('[data-more]');
-  if (m) m.onclick = () => { S.depLimit += 20; renderJour(p, isAgency); };
+const act = (go, icon, l, v) => '<button class="act" data-act="' + go + '"><span class="act-i">' + icon + '</span>' + l + '<span class="act-v">' + v + '</span></button>';
+const tile = (icon, v, l) => '<div class="tile"><div class="tile-i">' + icon + '</div><div class="tile-v">' + v + '</div><div class="tile-l">' + l + '</div></div>';
+
+function ticks(q) {
+  const days = q.jours_detail, max = Math.max(q.objectif / q.jours, ...days.map(d => d.ca)) || 1;
+  return '<div class="ticks">' + days.map(d => {
+    const future = d.date > S.data.today, h = future ? 4 : Math.max(4, Math.round(d.ca / max * 34));
+    return '<div class="tick' + (d.ca > 0 ? ' fill' : '') + (d.date === S.data.today ? ' today' : '') + '" style="height:' + h + 'px" data-tip="' + esc(dL(d.date) + '<br><b>' + money(d.ca) + '</b> · ' + d.depots + ' dépôt(s)' + (d.attente ? '<br>' + money(d.attente) + ' en attente' : '')) + '"></div>';
+  }).join('') + '</div>';
+}
+
+function deposits(p) {
+  const el = document.getElementById('dep'), f = S.depFilter;
+  const all = p.depots.filter(x => f === 'tous' || x.statut === f), list = all.slice(0, S.depLimit);
+  let h = '<div class="card-h"><div class="card-t">Dépôts</div><span class="card-s">' + all.length + '</span></div>' +
+    '<div class="seg">' + [['tous', 'Tous'], ['debloquee', 'Débloqués'], ['attente', 'En attente'], ['annulee', 'Annulés']].map(([k, l]) => '<button data-f="' + k + '" class="' + (f === k ? 'on' : '') + '">' + l + '</button>').join('') + '</div>';
+  if (!list.length) h += '<div class="empty">Aucun dépôt</div>';
+  let last = '';
+  list.forEach(x => {
+    if (x.date !== last) {
+      last = x.date;
+      const g = gap(x.date, S.data.today);
+      const lbl = g === 0 ? 'Aujourd\'hui' : g === 1 ? 'Hier' : dL(x.date).replace(/^./, c => c.toUpperCase());
+      const tot = list.filter(y => y.date === x.date && y.statut === 'debloquee').reduce((s, y) => s + y.commission, 0);
+      h += '<div class="group-h"><span>' + lbl + '</span><span>' + (tot ? '+' + money(tot) : '') + '</span></div>';
+    }
+    const st = ST[x.statut] || [x.statutLabel || '—', 'mute'];
+    const b = x.broker === 'PUPrime' ? ['pu', 'PU'] : x.broker === 'RaiseFX' ? ['rf', 'RF'] : ['ax', 'AX'];
+    h += '<div class="row"><div class="ava">' + esc(initials(x.name)) + '<span class="b b-' + b[0] + '">' + b[1] + '</span></div>' +
+      '<div class="row-m"><div class="row-t">' + esc(x.name) + '</div><div class="row-s">' + esc(x.broker) + (x.depot ? ' · dépôt ' + money(x.depot) : '') + (x.setter ? ' · ' + esc(x.setter) : '') + '</div></div>' +
+      '<div class="row-v"><div class="row-a' + (x.statut === 'annulee' ? ' strike' : '') + '">' + (x.statut === 'debloquee' ? '+' : '') + money(x.commission) + '</div><div class="row-b ' + st[1] + '">' + st[0] + '</div></div></div>';
+  });
+  if (all.length > list.length) h += '<button class="more" id="dep-more">Voir plus</button>';
+  el.innerHTML = h;
+  el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { S.depFilter = b.dataset.f; S.depLimit = 10; deposits(p); });
+  const more = document.getElementById('dep-more');
+  if (more) more.onclick = () => { S.depLimit += 25; deposits(p); };
+}
+
+// Courbe des 30 derniers jours (CA débloqué par jour), lissée
+function spark(p) {
+  const el = document.getElementById('spark'); if (!el) return;
+  const days = p.funnel.jours, vals = days.map(d => d.ca), n = vals.length;
+  const W = 400, H = 120, top = 14, bot = 6, max = Math.max(...vals, 1) * 1.1;
+  const pts = vals.map((v, i) => [i / (n - 1) * W, H - bot - (H - top - bot) * v / max]);
+  let d = 'M' + pts[0][0] + ' ' + pts[0][1];
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n - 1, i + 2)];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, Math.min(H - bot, p1[1] + (p2[1] - p0[1]) / 6)], c2 = [p2[0] - (p3[0] - p1[0]) / 6, Math.min(H - bot, p2[1] - (p3[1] - p1[1]) / 6)];
+    d += 'C' + c1.map(v => v.toFixed(1)).join(' ') + ' ' + c2.map(v => v.toFixed(1)).join(' ') + ' ' + p2.map(v => v.toFixed(1)).join(' ');
+  }
+  const area = d + 'L' + W + ' ' + H + 'L0 ' + H + 'Z';
+  const last = pts[n - 1];
+  el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+    '<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6C548" stop-opacity="0.32"/><stop offset="1" stop-color="#F6C548" stop-opacity="0"/></linearGradient>' +
+    '<linearGradient id="gl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C98B12" stop-opacity="0.5"/><stop offset="1" stop-color="#FFE39A"/></linearGradient></defs>' +
+    '<path d="' + area + '" fill="url(#ga)"/>' +
+    '<path d="' + d + '" fill="none" stroke="url(#gl)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
+    days.map((x, i) => '<rect x="' + (i / (n - 1) * W - W / n / 2) + '" y="0" width="' + (W / n) + '" height="' + H + '" fill="transparent" data-tip="' + esc(dL(x.date) + '<br><b>' + money(x.ca) + '</b> · ' + x.depots + ' dépôt(s)') + '"/>').join('') +
+    '</svg>' +
+    '<div style="position:absolute;right:-6px;top:' + (last[1] - 6) + 'px;width:12px;height:12px;border-radius:50%;background:#FFE39A;box-shadow:0 0 0 5px rgba(246,197,72,0.18),0 0 18px #F6C548;pointer-events:none"></div>';
 }
 
 // ---------- MOIS ----------
-function renderMois(p, isAgency) {
-  const m = p.mois;
-  const prog = m.objectif ? Math.min(100, m.ca / m.objectif * 100) : 0;
-  const expected = m.ecoules / m.jours * 100;
-  let html = '<div class="card hero"><div class="eyebrow">' + monthName(m.key) + ' ' + pill(m.statut) + '</div>' +
-    '<div class="big">' + bigMoney(m.ca) + '</div>' +
-    '<div class="sub">Objectif du mois <b>' + money(m.objectif) + '</b> · ' + m.depots + ' dépôts débloqués' +
-    (m.attente ? '<br><span class="st-attente">+ ' + money(m.attente) + ' en attente</span>' : '') + '</div>' +
-    '<div class="prog"><div class="bar"><div class="bar-fill" style="width:' + prog + '%"></div><div class="bar-mark" style="left:calc(' + Math.min(100, expected) + '% - 1px)"></div></div>' +
-    '<div class="bar-legend"><span><b>' + pctf(m.ca / (m.objectif || 1) * 100) + '</b> atteint</span><span>Jour ' + m.ecoules + ' / ' + m.jours + '</span></div></div></div>';
+function month(p) {
+  const m = p.mois, ag = isAgency(), pv = m.precedent;
+  const pace = pv.ca ? (m.ca / (m.ecoules / m.jours) - pv.ca) / pv.ca * 100 : null;
+  let h = '<div class="hero" style="padding-top:26px"><div class="hero-l">' + mCap(m.key) + '</div><div><div class="amount">' + amt(m.ca) + '</div></div>' +
+    '<div style="margin-top:14px">' + badge(m.statut) + '</div></div>';
 
-  html += '<div class="row stats">' + stat('Projection', money(m.projection), 'fin ' + MOIS[dParts(m.start)[1] - 1]) +
-    stat('Il faut / jour', money(m.rythmeNecessaire), 'sur ' + (m.jours - m.ecoules + 1) + ' jours') + '</div>';
+  h += '<div class="card"><div class="card-h"><div class="card-t">Objectif du mois</div><div class="card-s">' + money(m.objectif) + '</div></div>' +
+    '<div class="meter"><b style="width:' + Math.min(100, m.ca / (m.objectif || 1) * 100) + '%"></b><i style="left:calc(' + Math.min(100, m.ecoules / m.jours * 100) + '% - 1px)"></i></div>' +
+    '<div class="meter-l"><span><b>' + Math.round(m.ca / (m.objectif || 1) * 100) + ' %</b> atteint</span><span>jour ' + m.ecoules + ' / ' + m.jours + '</span></div></div>';
 
-  // Rémunération
-  html += '<div class="grid-2"><div class="card"><div class="eyebrow">Rémunération du mois <span class="r">calcul mensuel</span></div><div class="list" style="margin-top:8px">' +
-    kv('CA débloqué', money(m.ca)) +
-    kv('Frais', '− ' + money(m.frais), isAgency ? fraisDetail(p) : '') +
-    kv('Bénéfice net', money(m.benefice)) +
-    '<div class="kv total"><span class="k">Part ' + esc(p.partner.name) + (m.minimumApplique ? '<span class="tag">minimum garanti</span>' : '') + '</span><span class="v">' + money(m.partner) + '</span></div>' +
-    (isAgency ? kv('Marge agence', money(m.agence)) : '') +
-    '</div><div class="sub" style="font-size:12px">' + Math.round(p.params.pctPartner * 100) + ' % du bénéfice net, minimum ' + money(p.params.minMensuel) + ' par mois.</div></div>';
+  h += '<div class="tiles">' + tile(I.trend, money(m.projection), 'projection fin ' + MOIS[P(m.start)[1] - 1]) + tile(I.target, money(m.rythmeNecessaire), 'par jour pour l\'objectif') + '</div>';
 
-  // Comparaison mois précédent
-  const prev = m.precedent;
-  const ev = prev.ca ? (m.ca / (m.ecoules / m.jours) - prev.ca) / prev.ca * 100 : null;
-  html += '<div class="card flat"><div class="eyebrow">' + monthName(prev.key) + ' <span class="r">mois précédent</span></div><div class="list" style="margin-top:8px">' +
-    kv('CA débloqué', money(prev.ca)) + kv('Part ' + esc(short(p.partner.name)), money(prev.partner)) + (isAgency ? kv('Marge agence', money(prev.agence)) : '') +
-    '</div>' + (ev !== null ? '<div class="sub">Au rythme actuel, ce mois finirait à <b style="color:' + (ev >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (ev >= 0 ? '+' : '') + Math.round(ev) + ' %</b> par rapport à ' + MOIS[dParts(prev.key + '-01')[1] - 1] + '.</div>' : '') + '</div></div>';
-
-  // Graph quinzaine
-  const days = p.quinzaine.jours_detail;
-  html += '<div class="card"><div class="eyebrow">Quinzaine jour par jour <span class="r">' + dShort(p.quinzaine.start) + ' → ' + dShort(p.quinzaine.end) + '</span></div>' +
-    '<div class="chart" id="chart-q"></div><div class="legend"><span><i style="background:var(--gold)"></i>Débloqué</span><span><i style="background:var(--blue)"></i>En attente</span><span><i style="background:var(--text);opacity:.5;height:2px"></i>Rythme objectif</span></div></div>';
-  document.getElementById('p-mois').innerHTML = html;
-  barChart('chart-q', days.map(x => ({ label: String(dParts(x.date)[2]), a: x.ca, b: x.attente, future: x.date > p.today, tip: dDay(x.date) + '<br><b>' + money(x.ca) + '</b> débloqué' + (x.attente ? '<br>' + money(x.attente) + ' en attente' : '') + '<br>' + x.depots + ' dépôt(s)' })),
-    p.quinzaine.objectif / p.quinzaine.jours);
-}
-function kv(k, v, extra) { return '<div class="kv"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>' + (extra || ''); }
-function fraisDetail(p) {
-  const m = p.mois, pr = p.params;
-  const items = pr.fixes.map(f => esc(f.label) + ' ' + n0(f.eur) + ' €').concat(pr.variables.map(v => esc(v.label) + ' (' + money(m.fraisVariables) + ')'));
-  return items.length ? '<div style="font-size:11.5px;color:var(--dimmer);margin:-6px 0 4px">' + items.join(' · ') + '</div>' : '';
-}
-
-// ---------- FUNNEL ----------
-function renderFunnel(p) {
-  const N = S.funnelDays;
-  const days = p.funnel.jours.slice(-N);
-  const sum = k => days.reduce((s, x) => s + (x[k] || 0), 0);
-  const heures = sum('heures'), lives = sum('lives'), viewers = sum('viewers'), followers = sum('followers'), ajouts = sum('ajouts'), depots = sum('depots'), ca = sum('ca');
-  const maxV = Math.max(heures ? 1 : 0, 1);
-  let html = '';
-  const tgAge = p.funnel.derniereSaisieTelegram ? daysAgo(p.funnel.derniereSaisieTelegram, p.today) : null;
-  const lvAge = p.funnel.derniereSaisieLive ? daysAgo(p.funnel.derniereSaisieLive, p.today) : null;
-  const src = p.sources || {};
-  if (src.live && /impossible|refus/.test(src.live)) html += '<div class="warn soft"><span class="ic">●</span><div><b>Live Tracking pas encore connecté.</b> Le fichier n\'est pas lisible par le dashboard : il le sera dès que le compte de service sera branché.</div></div>';
-  else if (lvAge === null || lvAge > 2) html += '<div class="warn"><span class="ic">●</span><div><b>Live Tracking ' + (lvAge === null ? 'jamais rempli' : 'pas rempli depuis ' + lvAge + ' jours') + '.</b> Sans les lives, on ne sait pas ce qui génère les dépôts.</div></div>';
-  if (src.telegram && /impossible|refus/.test(src.telegram)) html += '<div class="warn soft"><span class="ic">●</span><div><b>Telegram Tracking pas encore connecté.</b> Même raison : accès en attente du compte de service.</div></div>';
-  else if (tgAge === null || tgAge > 2) html += '<div class="warn soft"><span class="ic">●</span><div><b>Telegram ' + (tgAge === null ? 'jamais rempli' : 'pas rempli depuis ' + tgAge + ' jours') + '.</b> Les ajouts du canal manquent pour mesurer la conversion.</div></div>';
-
-  html += '<div class="card"><div class="eyebrow">Du live au dépôt <span class="seg">' + [7, 14, 30].map(k => '<button data-fd="' + k + '" class="' + (N === k ? 'on' : '') + '">' + k + ' j</button>').join('') + '</span></div><div class="steps">' +
-    step('Heures de live', heures.toFixed(1).replace('.', ',') + ' h', 1, lives + ' live(s) · ' + n0(viewers) + ' viewers · ' + n0(followers) + ' followers') +
-    step('Ajouts Telegram', n0(ajouts), 1, viewers ? (ajouts / viewers * 100).toFixed(1).replace('.', ',') + ' % des viewers' : (p.funnel.membres ? n0(p.funnel.membres) + ' membres dans le canal' : '—')) +
-    step('Dépôts débloqués', n0(depots), ajouts ? Math.min(1, depots / ajouts * 10) : 0, ajouts ? (depots / ajouts * 100).toFixed(1).replace('.', ',') + ' dépôts pour 100 ajouts' : '—') +
-    step('CA débloqué', money(ca), 1, heures ? money(ca / heures) + ' par heure de live' : depots ? money(ca / depots) + ' par dépôt' : '—') +
+  h += '<div class="cols"><div class="card"><div class="card-t">Ta part ce mois</div>' +
+    '<div class="payout"><div class="payout-l"><span>Part ' + esc(short(p.partner.name)) + '</span>' + (m.minimumApplique ? '<span class="pill-s">Minimum garanti</span>' : '<span class="pill-s">' + Math.round(p.params.pctPartner * 100) + ' % du bénéfice</span>') + '</div>' +
+    '<div class="payout-v">' + amt(m.partner) + '</div><div class="payout-n">Minimum garanti : ' + money(p.params.minMensuel) + ' par mois</div></div>' +
+    '<div class="stmt">' +
+    srow('+', 'CA débloqué', money(m.ca)) +
+    srow('−', 'Frais', '− ' + money(m.frais)) + (ag ? '<div class="stmt-sub">' + p.params.fixes.map(f => esc(f.label) + ' ' + n0(f.eur) + ' €').concat(p.params.variables.map(v => esc(v.label) + ' : ' + money(m.fraisVariables))).join(' · ') + '</div>' : '') +
+    srow('=', 'Bénéfice net', money(m.benefice)) +
+    (ag ? srow('◆', 'Marge agence', '<span class="gold">' + money(m.agence) + '</span>') : '') +
     '</div></div>';
 
-  html += '<div class="card"><div class="eyebrow">Jour par jour <span class="r">' + N + ' derniers jours</span></div><div class="chart" id="chart-f"></div>' +
-    '<div class="legend"><span><i style="background:var(--gold)"></i>CA débloqué</span><span><i style="background:var(--green)"></i>Ajouts Telegram</span><span><i style="background:var(--blue)"></i>Heures de live</span></div></div>';
-  document.getElementById('p-funnel').innerHTML = html;
-  document.querySelectorAll('[data-fd]').forEach(b => b.onclick = () => { S.funnelDays = +b.dataset.fd; renderFunnel(p); });
-  comboChart('chart-f', days);
+  h += '<div class="card"><div class="card-h"><div class="card-t">' + mCap(pv.key) + '</div><div class="card-s">mois précédent</div></div><div class="stmt">' +
+    srow('', 'CA débloqué', money(pv.ca)) + srow('', 'Part ' + esc(short(p.partner.name)), money(pv.partner)) + (ag ? srow('', 'Marge agence', money(pv.agence)) : '') + '</div>' +
+    (pace !== null ? '<div class="card-s" style="margin-top:8px;line-height:1.5">Au rythme actuel, ce mois finit à <b class="' + (pace >= 0 ? 'pos' : 'neg') + '">' + (pace >= 0 ? '+' : '') + Math.round(pace) + ' %</b> par rapport à ' + MOIS[P(pv.key + '-01')[1] - 1] + '.</div>' : '') + '</div></div>';
+
+  h += '<div class="card"><div class="card-h"><div class="card-t">Jour par jour</div><div class="card-s">' + dS(p.quinzaine.start) + ' – ' + dS(p.quinzaine.end) + '</div></div><div class="chart" id="c-q"></div>' +
+    '<div class="legend"><span><i style="background:var(--gold)"></i>Débloqué</span><span><i style="background:var(--info)"></i>En attente</span><span><i style="background:rgba(255,255,255,.5)"></i>Rythme objectif</span></div></div>';
+  document.getElementById('p-mois').innerHTML = h;
+  bars('c-q', p.quinzaine.jours_detail.map(d => ({ l: String(P(d.date)[2]), a: d.ca, b: d.attente, future: d.date > S.data.today,
+    tip: dL(d.date) + '<br><b>' + money(d.ca) + '</b> · ' + d.depots + ' dépôt(s)' + (d.attente ? '<br>' + money(d.attente) + ' en attente' : '') })), p.quinzaine.objectif / p.quinzaine.jours);
 }
-function step(t, v, ratio, r) { return '<div class="step"><div class="step-t">' + t + '</div><div class="step-v">' + v + '</div><div class="step-r">' + r + '</div></div>'; }
+const srow = (i, k, v) => '<div class="stmt-r"><span class="k">' + (i ? '<i>' + i + '</i>' : '') + k + '</span><span class="v">' + v + '</span></div>';
+
+// ---------- FUNNEL ----------
+function funnel(p) {
+  const N = S.fDays, days = p.funnel.jours.slice(-N);
+  const sum = k => days.reduce((s, d) => s + (d[k] || 0), 0);
+  const H = sum('heures'), L = sum('lives'), V = sum('viewers'), F = sum('followers'), A = sum('ajouts'), Dp = sum('depots'), CA = sum('ca');
+  const src = p.sources || {};
+  const tgAge = p.funnel.derniereSaisieTelegram ? gap(p.funnel.derniereSaisieTelegram, S.data.today) : null;
+  const lvAge = p.funnel.derniereSaisieLive ? gap(p.funnel.derniereSaisieLive, S.data.today) : null;
+  const notConnected = s => s && /impossible|refus|aucun/.test(s);
+  let h = '<div class="hero" style="padding-top:26px"><div class="hero-l">Du live au dépôt · ' + N + ' derniers jours</div><div><div class="amount">' + amt(CA) + '</div></div>' +
+    '<div style="margin-top:14px"><div class="seg mini">' + [7, 14, 30].map(k => '<button data-d="' + k + '" class="' + (N === k ? 'on' : '') + '">' + k + ' jours</button>').join('') + '</div></div></div>';
+  if (notConnected(src.live)) h += note('i', '<b>Live Tracking pas encore connecté.</b> Il le sera dès que le compte de service aura accès au fichier.');
+  else if (lvAge === null || lvAge > 2) h += note('w', '<b>Live Tracking ' + (lvAge === null ? 'jamais rempli' : 'pas rempli depuis ' + lvAge + ' jours') + '.</b> Sans les lives, impossible de savoir ce qui génère les dépôts.');
+  if (notConnected(src.telegram)) h += note('i', '<b>Telegram Tracking pas encore connecté.</b> Même raison : accès en attente.');
+  else if (tgAge === null || tgAge > 2) h += note('w', '<b>Telegram ' + (tgAge === null ? 'jamais rempli' : 'pas rempli depuis ' + tgAge + ' jours') + '.</b> Les ajouts du canal manquent pour mesurer la conversion.');
+
+  const steps = [
+    { l: 'Heures de live', v: (Math.round(H * 10) / 10).toString().replace('.', ',') + ' h', r: L + ' live(s) · ' + n0(V) + ' viewers', w: 1 },
+    { l: 'Ajouts Telegram', v: n0(A), r: F ? n0(F) + ' followers TikTok' : (p.funnel.membres ? n0(p.funnel.membres) + ' membres au total' : ''), w: 0.78 },
+    { l: 'Dépôts débloqués', v: n0(Dp), r: Dp ? money(CA / Dp) + ' par dépôt' : '', w: 0.56 },
+    { l: 'CA débloqué', v: money(CA), r: H ? money(CA / H) + ' par heure de live' : '', w: 0.4 }
+  ];
+  const conv = [V && A ? (A / V * 100).toFixed(1).replace('.', ',') + ' % des viewers rejoignent' : null, A && Dp ? (Dp / A * 100).toFixed(1).replace('.', ',') + ' % des ajouts déposent' : null, null];
+  h += '<div class="card"><div class="card-t">Entonnoir</div><div class="fun">' + steps.map((s, i) =>
+    '<div class="fun-s" style="width:' + (100 - i * 6) + '%"><div class="bg" style="width:' + (s.w * 100) + '%"></div><div class="l">' + s.l + '<b>' + s.v + '</b></div><div class="r">' + esc(s.r) + '</div></div>' +
+    (i < 3 ? '<div class="fun-c">' + (conv[i] || '↓') + '</div>' : '')).join('') + '</div></div>';
+
+  h += '<div class="card"><div class="card-h"><div class="card-t">Jour par jour</div><div class="card-s">' + N + ' jours</div></div><div class="chart" id="c-f"></div>' +
+    '<div class="legend"><span><i style="background:var(--gold)"></i>CA</span><span><i style="background:var(--pos)"></i>Ajouts Telegram</span><span><i style="background:var(--info)"></i>Live</span></div></div>';
+  document.getElementById('p-funnel').innerHTML = h;
+  document.querySelectorAll('#p-funnel [data-d]').forEach(b => b.onclick = () => { S.fDays = +b.dataset.d; funnel(p); });
+  combo('c-f', days);
+}
+const note = (k, t) => '<div class="note"><span class="ni ' + k + '">' + I.alert + '</span><div>' + t + '</div></div>';
 
 // ---------- HISTORIQUE ----------
-function renderHisto(p, isAgency) {
-  const mode = S.histoMode;
-  let html = '<div class="card"><div class="eyebrow">CA débloqué <span class="seg"><button data-hm="mois" class="' + (mode === 'mois' ? 'on' : '') + '">Mois</button><button data-hm="q" class="' + (mode === 'q' ? 'on' : '') + '">Quinzaines</button></span></div><div class="chart" id="chart-h"></div></div>';
+function histo(p) {
+  const mode = S.histo, ag = isAgency(), src = mode === 'mois' ? p.historique.mois : p.historique.quinzaines;
+  const total = src.reduce((s, x) => s + x.ca, 0);
+  let h = '<div class="hero" style="padding-top:26px"><div class="hero-l">' + (mode === 'mois' ? '6 derniers mois' : '8 dernières quinzaines') + '</div><div><div class="amount">' + amt(total) + '</div></div>' +
+    '<div style="margin-top:14px"><div class="seg mini"><button data-h="mois" class="' + (mode === 'mois' ? 'on' : '') + '">Mois</button><button data-h="q" class="' + (mode === 'q' ? 'on' : '') + '">Quinzaines</button></div></div></div>';
+  h += '<div class="card"><div class="chart" id="c-h" style="margin-top:4px"></div></div>';
+  h += '<div class="card">';
   if (mode === 'mois') {
-    html += '<div class="card flat"><table class="tbl"><thead><tr><th>Mois</th><th>CA</th><th>Dépôts</th><th>Part ' + esc(p.partner.name) + '</th>' + (isAgency ? '<th>Agence</th>' : '') + '</tr></thead><tbody>' +
-      p.historique.mois.slice().reverse().map(x => '<tr class="' + (x.key === p.mois.key ? 'cur' : '') + '"><td>' + monthShort(x.key) + ' ' + x.key.slice(2, 4) + '</td><td class="g">' + money(x.ca) + '</td><td>' + x.depots + '</td><td>' + money(x.partner) + '</td>' + (isAgency ? '<td>' + money(x.agence) + '</td>' : '') + '</tr>').join('') +
-      '</tbody></table></div>';
+    h += '<div class="hrow head' + (ag ? ' a4' : '') + '"><span>Mois</span><span>CA</span><span>Dépôts</span><span>Part ' + esc(short(p.partner.name)) + '</span>' + (ag ? '<span>Agence</span>' : '') + '</div>' +
+      src.slice().reverse().map(x => '<div class="hrow' + (ag ? ' a4' : '') + (x.key === p.mois.key ? ' cur' : '') + '"><span>' + MC[P(x.key + '-01')[1] - 1] + ' ' + x.key.slice(2, 4) + '</span><span>' + money(x.ca) + '</span><span>' + x.depots + '</span><span>' + money(x.partner) + '</span>' + (ag ? '<span>' + money(x.agence) + '</span>' : '') + '</div>').join('');
   } else {
-    html += '<div class="card flat"><table class="tbl"><thead><tr><th>Quinzaine</th><th>CA</th><th>Attente</th><th>Dépôts</th>' + (isAgency ? '<th>Payé le</th>' : '') + '</tr></thead><tbody>' +
-      p.historique.quinzaines.slice().reverse().map(x => '<tr class="' + (x.key === p.quinzaine.key ? 'cur' : '') + '"><td>' + dNum(x.start) + '–' + dNum(x.end) + '</td><td class="g">' + money(x.ca) + '</td><td>' + (x.attente ? money(x.attente) : '—') + '</td><td>' + x.depots + '</td>' + (isAgency ? '<td>' + dNum(x.payout) + '</td>' : '') + '</tr>').join('') +
-      '</tbody></table></div>';
+    h += '<div class="hrow head' + (ag ? ' a4' : '') + '"><span>Quinzaine</span><span>CA</span><span>Dépôts</span><span>Attente</span>' + (ag ? '<span>Payé le</span>' : '') + '</div>' +
+      src.slice().reverse().map(x => '<div class="hrow' + (ag ? ' a4' : '') + (x.key === p.quinzaine.key ? ' cur' : '') + '"><span>' + dN(x.start) + '–' + dN(x.end).slice(0, 2) + '</span><span>' + money(x.ca) + '</span><span>' + x.depots + '</span><span>' + (x.attente ? money(x.attente) : '—') + '</span>' + (ag ? '<span>' + dN(x.payout) + '</span>' : '') + '</div>').join('');
   }
-  document.getElementById('p-histo').innerHTML = html;
-  document.querySelectorAll('[data-hm]').forEach(b => b.onclick = () => { S.histoMode = b.dataset.hm; renderHisto(p, isAgency); });
-  const src = mode === 'mois' ? p.historique.mois : p.historique.quinzaines;
-  barChart('chart-h', src.map(x => ({ label: mode === 'mois' ? monthShort(x.key) : dNum(x.start).slice(0, 2) + '/' + dNum(x.start).slice(3), a: x.ca, b: x.attente || 0, current: mode === 'mois' ? x.key === p.mois.key : x.key === p.quinzaine.key,
-    tip: (mode === 'mois' ? monthName(x.key) : dShort(x.start) + ' → ' + dShort(x.end)) + '<br><b>' + money(x.ca) + '</b> débloqué' + (x.attente ? '<br>' + money(x.attente) + ' en attente' : '') + '<br>' + x.depots + ' dépôt(s)' })),
+  h += '</div>';
+  document.getElementById('p-histo').innerHTML = h;
+  document.querySelectorAll('#p-histo [data-h]').forEach(b => b.onclick = () => { S.histo = b.dataset.h; histo(p); });
+  bars('c-h', src.map(x => ({ l: mode === 'mois' ? MC[P(x.key + '-01')[1] - 1] : dN(x.start).slice(0, 5), a: x.ca, b: x.attente || 0, cur: mode === 'mois' ? x.key === p.mois.key : x.key === p.quinzaine.key,
+    tip: (mode === 'mois' ? mCap(x.key) : dS(x.start) + ' – ' + dS(x.end)) + '<br><b>' + money(x.ca) + '</b> · ' + x.depots + ' dépôt(s)' + (x.attente ? '<br>' + money(x.attente) + ' en attente' : '') })),
     mode === 'mois' ? p.params.objectifMois : p.params.objectifQuinzaine, true);
 }
 
 // ---------- AGENCE ----------
-function renderAgency() {
-  const d = S.data, t = d.total;
-  const prog = t.objectif ? Math.min(100, t.ca / t.objectif * 100) : 0;
-  const m0 = d.partners[0] ? d.partners[0].mois : null;
-  const expected = m0 ? m0.ecoules / m0.jours * 100 : 0;
-  let html = '<div class="card hero"><div class="eyebrow">' + (m0 ? monthName(m0.key) : 'Ce mois') + ' · tous partenaires</div>' +
-    '<div class="big">' + bigMoney(t.ca) + '</div>' +
-    '<div class="sub">Objectif cumulé <b>' + money(t.objectif) + '</b> · aujourd\'hui <b>' + money(t.caJour) + '</b>' + (t.attente ? '<br><span class="st-attente">+ ' + money(t.attente) + ' en attente</span>' : '') + '</div>' +
-    '<div class="prog"><div class="bar"><div class="bar-fill" style="width:' + prog + '%"></div><div class="bar-mark" style="left:calc(' + Math.min(100, expected) + '% - 1px)"></div></div>' +
-    '<div class="bar-legend"><span><b>' + pctf(t.ca / (t.objectif || 1) * 100) + '</b> atteint</span><span>' + (m0 ? 'Jour ' + m0.ecoules + ' / ' + m0.jours : '') + '</span></div></div></div>';
+function agency() {
+  const d = S.data, t = d.total, m0 = d.partners[0] && d.partners[0].mois;
+  let h = '<div class="hero"><div class="hero-l">CA de ' + (m0 ? MOIS[P(m0.start)[1] - 1] : 'ce mois') + ' · tous partenaires</div><div><div class="amount">' + amt(t.ca) + '</div></div>' +
+    '<div><span class="hero-chip"><i></i>' + Math.round(t.ca / (t.objectif || 1) * 100) + ' % de ' + money(t.objectif) + '</span></div></div>';
+  h += '<div class="carousel">' + d.partners.map((p, i) => {
+    const m = p.mois;
+    return '<button class="pc" data-open="' + i + '"><div><div class="pc-top"><div><div class="pc-n">' + esc(short(p.partner.name)) + '</div><div class="pc-b">' + esc(brand(p.partner.name)) + '</div></div>' + badge(m.statut) + '</div>' +
+      '<div class="pc-v">' + amt(m.ca) + '</div></div><div><div class="meter"><b style="width:' + Math.min(100, m.ca / (m.objectif || 1) * 100) + '%"></b><i style="left:calc(' + Math.min(100, m.ecoules / m.jours * 100) + '% - 1px)"></i></div>' +
+      '<div class="pc-f"><span>sur ' + money(m.objectif) + '</span><span>marge ' + money(m.agence) + '</span></div></div></button>';
+  }).join('') + '</div>';
+  h += '<div class="tiles">' + tile(I.trend, '<span class="gold">' + money(t.agence) + '</span>', 'marge agence ce mois') + tile(I.users, money(t.partenaires), 'à reverser aux partenaires') + '</div>';
+  h += '<div class="tiles">' + tile(I.bolt, money(t.caJour), 'débloqué aujourd\'hui') + tile(I.clock, money(t.attente), 'en attente, hors CA') + '</div>';
 
-  html += '<div class="row stats">' + stat('Marge agence', money(t.agence), 'après frais et partenaires') + stat('Partenaires', money(t.partenaires), 'à reverser ce mois') + '</div>';
-
-  html += '<div class="grid-2"><div class="card"><div class="eyebrow">Partenaires <span class="r">CA du mois</span></div>' +
-    d.partners.map((p, i) => {
-      const m = p.mois, pr = m.objectif ? Math.min(100, m.ca / m.objectif * 100) : 0;
-      return '<button class="pcard" data-open="' + i + '"><div class="pcard-h"><span><span class="pcard-n">' + esc(short(p.partner.name)) + '</span>' + (brandOf(p.partner.name) ? '<span class="pcard-b">' + esc(brandOf(p.partner.name)) + '</span>' : '') + '</span>' + pill(m.statut) + '</div>' +
-        '<div class="bar"><div class="bar-fill" style="width:' + pr + '%"></div><div class="bar-mark" style="left:calc(' + Math.min(100, m.ecoules / m.jours * 100) + '% - 1px)"></div></div>' +
-        '<div class="pcard-row"><span><b>' + money(m.ca) + '</b> / ' + money(m.objectif) + '</span><span>' + (m.attente ? '<span class="st-attente">' + money(m.attente) + ' en attente</span>' : m.depots + ' dépôts') + '</span></div>' +
-        '<div class="pcard-row"><span>Aujourd\'hui <b>' + money(p.jour.ca) + '</b></span><span>Marge <b>' + money(m.agence) + '</b></span></div></button>';
-    }).join('') + '</div>';
-
-  html += '<div class="card"><div class="eyebrow">Encaissements à venir <span class="r">brokers</span></div><div class="list">' +
-    (d.encaissements.length ? d.encaissements.map(e => '<div class="li"><div class="li-ico">' + dParts(e.date)[2] + '</div><div class="li-main"><div class="li-t">' + dDay(e.date) + (e.enCours ? '<span class="tag">en cours</span>' : '') + '</div><div class="li-s">' +
-      'Quinzaine ' + dNum(e.start) + '–' + dNum(e.end) + ' · ' + e.detail.filter(x => x.montant || x.attente).map(x => esc(x.partner) + ' ' + money(x.montant)).join(', ') + '</div></div>' +
-      '<div class="li-v"><div class="a">' + money(e.montant) + '</div>' + (e.attente ? '<div class="b st-attente">+ ' + money(e.attente) + ' attente</div>' : '') + '</div></div>').join('') : '<div class="empty">Rien à encaisser</div>') +
-    '</div></div></div>';
+  h += '<div class="cols"><div class="card"><div class="card-h"><div class="card-t">Encaissements à venir</div><div class="card-s">brokers</div></div>' +
+    (d.encaissements.length ? d.encaissements.map(e => '<div class="row"><div class="ava" style="background:var(--gold-a);color:var(--gold)">' + P(e.date)[2] + '</div><div class="row-m"><div class="row-t">' + dL(e.date).replace(/^./, c => c.toUpperCase()) + '</div><div class="row-s">' +
+      dS(e.start) + ' – ' + dS(e.end) + (e.enCours ? ' · en cours' : '') + '</div></div><div class="row-v"><div class="row-a">' + money(e.montant) + '</div>' + (e.attente ? '<div class="row-b info">+ ' + money(e.attente) + ' attente</div>' : '<div class="row-b mute">' + e.detail.filter(x => x.montant).map(x => short(x.partner)).join(', ') + '</div>') + '</div></div>').join('')
+      : '<div class="empty">Rien à encaisser</div>') + '</div>';
 
   const an = d.anomalies;
-  html += '<div class="card"><div class="eyebrow">À vérifier <span class="r">' + an.length + ' point(s)</span></div><div class="list">' +
-    (an.length ? an.slice(0, S.anomLimit).map(a => '<div class="anom"><div class="anom-dot g' + a.gravite + '"></div><div><div class="anom-t">' + esc(a.name) + ' · ' + money(a.montant) + '</div><div class="anom-s">' + esc(a.texte) + '<br>' + esc(a.partner) + ' · ' + esc(a.broker) + ' · ' + dShort(a.date) + '</div></div></div>').join('') : '<div class="empty">Tout est propre</div>') +
-    '</div>' + (an.length > S.anomLimit ? '<button class="more" id="anom-more">Voir les ' + (an.length - S.anomLimit) + ' autres</button>' : '') + '</div>';
-  document.getElementById('p-agence').innerHTML = html;
-  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => { S.partnerIdx = +b.dataset.open; go('jour'); });
-  const more = document.getElementById('anom-more');
-  if (more) more.onclick = () => { S.anomLimit = 999; renderAgency(); };
+  h += '<div class="card"><div class="card-h"><div class="card-t">À vérifier</div><div class="card-s">' + an.length + '</div></div>' +
+    (an.length ? an.slice(0, S.anomLimit).map(a => '<div class="an"><div class="an-i g' + a.gravite + '">' + I.alert + '</div><div style="flex:1;min-width:0"><div class="an-t"><span>' + esc(a.name) + '</span><span>' + money(a.montant) + '</span></div><div class="an-s">' + esc(a.texte) + '<br>' + esc(a.partner.split(' + ').map(short).join(' + ')) + ' · ' + dS(a.date) + '</div></div></div>').join('') : '<div class="empty">Tout est propre</div>') +
+    (an.length > S.anomLimit ? '<button class="more" id="an-more">Tout afficher</button>' : '') + '</div></div>';
+  document.getElementById('p-agence').innerHTML = h;
+  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => { S.pi = +b.dataset.open; show('jour'); });
+  const more = document.getElementById('an-more');
+  if (more) more.onclick = () => { S.anomLimit = 999; agency(); };
 }
 
 // ============================================================================
-// GRAPHIQUES (SVG)
+// GRAPHIQUES
 // ============================================================================
 const tipEl = document.getElementById('tip');
-function bindTips(el) {
-  el.querySelectorAll('[data-tip]').forEach(g => {
-    const show = e => { tipEl.innerHTML = g.dataset.tip; tipEl.style.opacity = 1; const pt = e.touches ? e.touches[0] : e; const w = tipEl.offsetWidth; tipEl.style.left = Math.max(8, Math.min(innerWidth - w - 8, pt.clientX - w / 2)) + 'px'; tipEl.style.top = (pt.clientY - tipEl.offsetHeight - 14) + 'px'; };
-    g.addEventListener('mousemove', show); g.addEventListener('touchstart', show, { passive: true });
+function tips(root) {
+  root.querySelectorAll('[data-tip]').forEach(g => {
+    const on = e => { tipEl.innerHTML = g.dataset.tip; tipEl.style.opacity = 1; const pt = e.touches ? e.touches[0] : e; const w = tipEl.offsetWidth;
+      tipEl.style.left = Math.max(8, Math.min(innerWidth - w - 8, pt.clientX - w / 2)) + 'px'; tipEl.style.top = Math.max(8, pt.clientY - tipEl.offsetHeight - 16) + 'px'; };
+    g.addEventListener('mousemove', on); g.addEventListener('touchstart', on, { passive: true });
     g.addEventListener('mouseleave', () => tipEl.style.opacity = 0);
   });
 }
 document.addEventListener('touchstart', e => { if (!e.target.closest('[data-tip]')) tipEl.style.opacity = 0; }, { passive: true });
+const nice = v => { if (v <= 0) return 100; const p = Math.pow(10, Math.floor(Math.log10(v))); return Math.ceil(v / p * 2) / 2 * p; };
+const kfmt = v => v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0).replace('.', ',') + 'k' : String(Math.round(v));
 
-function niceMax(v) { if (v <= 0) return 100; const p = Math.pow(10, Math.floor(Math.log10(v))); return Math.ceil(v / p * 2) / 2 * p; }
-
-function barChart(id, items, target, labelsAll) {
+function bars(id, items, target, allLabels) {
   const el = document.getElementById(id); if (!el) return;
-  const W = 340, H = 170, pl = 34, pr = 4, pt = 10, pb = 22;
-  const max = niceMax(Math.max(target || 0, ...items.map(x => x.a + x.b)));
+  const W = 360, H = 180, pl = 30, pr = 2, pt = 8, pb = 22;
+  const max = nice(Math.max(target || 0, ...items.map(x => x.a + x.b)));
   const bw = (W - pl - pr) / items.length, y = v => pt + (H - pt - pb) * (1 - v / max);
-  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '">';
-  [0, 0.5, 1].forEach(f => { const v = max * f; s += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#1A2140" stroke-width="1"/><text class="axis" x="' + (pl - 6) + '" y="' + (y(v) + 3) + '" text-anchor="end">' + (v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0).replace('.', ',') + 'k' : Math.round(v)) + '</text>'; });
+  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '"><defs><linearGradient id="gb' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE39A"/><stop offset="0.5" stop-color="#F6C548"/><stop offset="1" stop-color="#C98B12"/></linearGradient></defs>';
+  [0, 0.5, 1].forEach(f => s += '<line x1="' + pl + '" x2="' + W + '" y1="' + y(max * f) + '" y2="' + y(max * f) + '" stroke="rgba(255,255,255,0.06)"/><text class="ax" x="' + (pl - 6) + '" y="' + (y(max * f) + 3) + '" text-anchor="end">' + kfmt(max * f) + '</text>');
   items.forEach((x, i) => {
-    const gx = pl + i * bw, w = Math.max(3, bw * 0.62), bx = gx + (bw - w) / 2;
-    const ya = y(x.a), yb = y(x.a + x.b);
+    const gx = pl + i * bw, w = Math.max(4, Math.min(28, bw * 0.58)), bx = gx + (bw - w) / 2, ya = y(x.a), yb = y(x.a + x.b), r = Math.min(6, w / 2);
     s += '<g data-tip="' + esc(x.tip) + '"><rect x="' + gx + '" y="' + pt + '" width="' + bw + '" height="' + (H - pt - pb) + '" fill="transparent"/>';
-    if (x.future) s += '<rect x="' + bx + '" y="' + (H - pb - 2) + '" width="' + w + '" height="2" rx="1" fill="#1A2140"/>';
-    if (x.b > 0) s += '<rect x="' + bx + '" y="' + yb + '" width="' + w + '" height="' + Math.max(0, ya - yb) + '" rx="3" fill="#7AA2FF" opacity="0.55"/>';
-    if (x.a > 0) s += '<rect x="' + bx + '" y="' + ya + '" width="' + w + '" height="' + Math.max(2, H - pb - ya) + '" rx="4" fill="' + (x.current ? '#FFE08A' : '#F5C542') + '"/>';
-    if (labelsAll || items.length <= 16 || i % 2 === 0) s += '<text class="axis" x="' + (gx + bw / 2) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(x.label) + '</text>';
+    if (x.future) s += '<rect x="' + bx + '" y="' + (H - pb - 3) + '" width="' + w + '" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>';
+    if (x.b > 0) s += '<rect x="' + bx + '" y="' + yb + '" width="' + w + '" height="' + Math.max(0, ya - yb + (x.a > 0 ? r : 0)) + '" rx="' + r + '" fill="#6EA8FF" opacity="0.55"/>';
+    if (x.a > 0) s += '<rect x="' + bx + '" y="' + ya + '" width="' + w + '" height="' + Math.max(3, H - pb - ya) + '" rx="' + r + '" fill="url(#gb' + id + ')"' + (x.cur ? '' : '') + '/>';
+    if (allLabels || items.length <= 16 || i % 2 === 0) s += '<text class="ax" x="' + (gx + bw / 2) + '" y="' + (H - 6) + '" text-anchor="middle"' + (x.cur ? ' style="fill:#FFE39A"' : '') + '>' + esc(x.l) + '</text>';
     s += '</g>';
   });
-  if (target) s += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(target) + '" y2="' + y(target) + '" stroke="#F4F5FA" stroke-opacity="0.5" stroke-dasharray="4 4"/>';
+  if (target) s += '<line x1="' + pl + '" x2="' + W + '" y1="' + y(target) + '" y2="' + y(target) + '" stroke="rgba(255,255,255,0.4)" stroke-dasharray="3 5"/>';
   el.innerHTML = s + '</svg>';
-  bindTips(el);
+  tips(el);
 }
 
-function comboChart(id, days) {
+function combo(id, days) {
   const el = document.getElementById(id); if (!el) return;
-  const W = 340, H = 180, pl = 34, pr = 26, pt = 10, pb = 22;
-  const maxCa = niceMax(Math.max(...days.map(d => d.ca)));
-  const maxAj = Math.max(1, ...days.map(d => d.ajouts));
-  const maxH = Math.max(1, ...days.map(d => d.heures));
-  const bw = (W - pl - pr) / days.length;
-  const y = (v, m) => pt + (H - pt - pb) * (1 - v / m);
-  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '">';
-  [0, 0.5, 1].forEach(f => { const v = maxCa * f; s += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(v, maxCa) + '" y2="' + y(v, maxCa) + '" stroke="#1A2140"/><text class="axis" x="' + (pl - 6) + '" y="' + (y(v, maxCa) + 3) + '" text-anchor="end">' + (v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0).replace('.', ',') + 'k' : Math.round(v)) + '</text>'; });
-  s += '<text class="axis" x="' + (W - pr + 6) + '" y="' + (pt + 3) + '" fill="#2EE59D">' + maxAj + '</text>';
-  let line = '', hl = '';
+  const W = 360, H = 180, pl = 30, pr = 4, pt = 8, pb = 22;
+  const maxC = nice(Math.max(...days.map(d => d.ca))), maxA = Math.max(1, ...days.map(d => d.ajouts)), maxH = Math.max(1, ...days.map(d => d.heures));
+  const bw = (W - pl - pr) / days.length, y = (v, m) => pt + (H - pt - pb) * (1 - v / m);
+  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '"><defs><linearGradient id="gc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE39A"/><stop offset="1" stop-color="#C98B12"/></linearGradient></defs>';
+  [0, 0.5, 1].forEach(f => s += '<line x1="' + pl + '" x2="' + W + '" y1="' + y(maxC * f, maxC) + '" y2="' + y(maxC * f, maxC) + '" stroke="rgba(255,255,255,0.06)"/><text class="ax" x="' + (pl - 6) + '" y="' + (y(maxC * f, maxC) + 3) + '" text-anchor="end">' + kfmt(maxC * f) + '</text>');
+  let line = '';
   days.forEach((d, i) => {
-    const gx = pl + i * bw, w = Math.max(3, bw * 0.55), bx = gx + (bw - w) / 2, cx = gx + bw / 2;
-    s += '<g data-tip="' + esc(dDay(d.date) + '<br><b>' + money(d.ca) + '</b> · ' + d.depots + ' dépôt(s)<br>' + d.ajouts + ' ajouts Telegram<br>' + (d.heures ? d.heures.toFixed(1).replace('.', ',') + ' h de live · ' + n0(d.viewers) + ' viewers' : 'pas de live saisi')) + '">' +
+    const gx = pl + i * bw, w = Math.max(4, Math.min(18, bw * 0.5)), bx = gx + (bw - w) / 2, cx = gx + bw / 2, r = Math.min(5, w / 2);
+    s += '<g data-tip="' + esc(dL(d.date) + '<br><b>' + money(d.ca) + '</b> · ' + d.depots + ' dépôt(s)<br>' + d.ajouts + ' ajouts Telegram<br>' + (d.heures ? String(d.heures).replace('.', ',') + ' h de live · ' + n0(d.viewers) + ' viewers' : 'pas de live saisi')) + '">' +
       '<rect x="' + gx + '" y="' + pt + '" width="' + bw + '" height="' + (H - pt - pb) + '" fill="transparent"/>';
-    if (d.ca > 0) s += '<rect x="' + bx + '" y="' + y(d.ca, maxCa) + '" width="' + w + '" height="' + Math.max(2, H - pb - y(d.ca, maxCa)) + '" rx="3" fill="#F5C542" opacity="0.9"/>';
-    if (d.heures > 0) s += '<rect x="' + (cx - 1.5) + '" y="' + (H - pb + 3) + '" width="3" height="3" rx="1.5" fill="#7AA2FF"/><rect x="' + bx + '" y="' + (H - pb - 3) + '" width="' + w + '" height="3" rx="1.5" fill="#7AA2FF" opacity="' + (0.3 + 0.7 * d.heures / maxH) + '"/>';
-    if (days.length <= 14 || i % Math.ceil(days.length / 10) === 0) s += '<text class="axis" x="' + cx + '" y="' + (H - 6) + '" text-anchor="middle">' + dParts(d.date)[2] + '</text>';
+    if (d.ca > 0) s += '<rect x="' + bx + '" y="' + y(d.ca, maxC) + '" width="' + w + '" height="' + Math.max(3, H - pb - y(d.ca, maxC)) + '" rx="' + r + '" fill="url(#gc)"/>';
+    if (d.heures > 0) s += '<circle cx="' + cx + '" cy="' + (H - pb + 5) + '" r="' + (1.5 + 2.5 * d.heures / maxH) + '" fill="#6EA8FF"/>';
+    if (days.length <= 14 || i % Math.ceil(days.length / 10) === 0) s += '<text class="ax" x="' + cx + '" y="' + (H - 4) + '" text-anchor="middle">' + P(d.date)[2] + '</text>';
     s += '</g>';
-    line += (i ? 'L' : 'M') + cx.toFixed(1) + ' ' + y(d.ajouts, maxAj).toFixed(1);
+    line += (i ? 'L' : 'M') + cx.toFixed(1) + ' ' + y(d.ajouts, maxA).toFixed(1);
   });
-  s += '<path d="' + line + '" fill="none" stroke="#2EE59D" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" pointer-events="none"/>';
+  if (days.some(d => d.ajouts)) s += '<path d="' + line + '" fill="none" stroke="#3DDC97" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" pointer-events="none"/>';
   el.innerHTML = s + '</svg>';
-  bindTips(el);
+  tips(el);
 }
 
 // ============================================================================
 // NAVIGATION
 // ============================================================================
-function go(page, silent) {
-  if (S.data && S.data.mode !== 'agence' && page === 'agence') page = 'jour';
+function show(page, silent) {
+  if (!isAgency() && page === 'agence') page = 'jour';
   const changed = S.page !== page;
   S.page = page;
-  if (S.data && S.data.mode === 'agence' && page !== 'agence' && S.partnerIdx < 0) { S.partnerIdx = 0; }
-  if (S.data && changed && !silent) { render(); }
-  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.dataset.page === page));
+  if (changed && !silent && S.data) render();
+  document.querySelectorAll('.page').forEach(x => x.classList.toggle('on', x.dataset.page === page));
   document.querySelectorAll('.nav [data-go]').forEach(b => b.classList.toggle('on', b.dataset.go === page));
-  if (S.data) { renderHeader(); renderChips(); }
-  if (!silent) window.scrollTo({ top: 0 });
+  if (S.data) header();
+  if (changed && !silent) scrollTo({ top: 0 });
   try { sessionStorage.setItem('bena_page', page); } catch (e) {}
 }
-document.querySelectorAll('.nav [data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+document.querySelectorAll('.nav [data-go]').forEach(b => b.onclick = () => show(b.dataset.go));
 
-// ============================================================================
-// DÉMARRAGE
-// ============================================================================
 (function init() {
   try { const pg = sessionStorage.getItem('bena_page'); if (pg && (pg !== 'agence' || ADMIN)) S.page = pg; } catch (e) {}
-  if (!ADMIN && S.page === 'agence') S.page = 'jour';
-  go(S.page, true);
+  show(S.page, true);
   const c = readCache();
   if (c) { S.data = c.data; S.stale = Date.now() - c.at > 5 * 60000; S.staleAt = c.at; render(); }
   load();

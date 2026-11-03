@@ -123,6 +123,7 @@ function readLives(rows) {
 }
 
 // ---------- Agrégats ----------
+const short = n => String(n || '').replace(/\s*\(.*\)\s*/, '').trim() || n;
 const round = n => Math.round(n * 100) / 100;
 function sumIn(deps, a, b, statut) { return deps.filter(d => inRange(d.date, a, b) && (!statut || d.statut === statut)).reduce((s, d) => s + d.commission, 0); }
 function countIn(deps, a, b, statut) { return deps.filter(d => inRange(d.date, a, b) && d.statut === statut).length; }
@@ -173,6 +174,27 @@ function dailySeries(deps, funnelTg, funnelLive, start, end) {
   return days;
 }
 
+// ---------- Même client ? ----------
+// Deux lignes = même client si leurs noms partagent au moins 2 mots (ordre et casse ignorés,
+// fautes de frappe d'un mot tolérées) ou si le pseudo Telegram, assez long pour être distinctif, est identique.
+const tokens = s => norm(s).replace(/[^a-z0-9 ]/g, ' ').split(' ').filter(w => w.length >= 3);
+function sameClient(a, b) {
+  const ta = tokens(a.name), tb = new Set(tokens(b.name));
+  if (ta.filter(w => tb.has(w)).length >= 2) return true;
+  const ga = norm(a.tg).replace(/\s+/g, ''), gb = norm(b.tg).replace(/\s+/g, '');
+  return ga.length >= 10 && ga === gb;
+}
+function groupClients(deps) {
+  const groups = [], used = new Set();
+  deps.forEach((a, i) => {
+    if (used.has(i)) return;
+    const g = [a];
+    deps.forEach((b, j) => { if (j > i && !used.has(j) && sameClient(a, b)) { g.push(b); used.add(j); } });
+    if (g.length > 1) groups.push(g);
+  });
+  return groups;
+}
+
 // ---------- Anomalies d'un partenaire ----------
 function anomaliesFor(deps, today, partnerName) {
   const out = [];
@@ -184,12 +206,10 @@ function anomaliesFor(deps, today, partnerName) {
       out.push({ type: 'conflit', gravite: 2, partner: partnerName, date: d.date, name: d.name, broker: d.broker, montant: d.commission,
         texte: 'Statut « ' + d.statutLabel + ' » mais setter « ' + d.statutSetterLabel + ' »' });
   });
-  const seen = {};
-  deps.forEach(d => { const k = norm(d.name); (seen[k] = seen[k] || []).push(d); });
-  Object.values(seen).filter(g => g.length > 1).forEach(g => {
+  groupClients(deps).forEach(g => {
     out.push({ type: 'doublon', gravite: 3, partner: partnerName, date: g[0].date, name: g[0].name, broker: g.map(x => x.broker).join(' + '),
       montant: g.reduce((s, x) => s + x.commission, 0),
-      texte: 'Client saisi ' + g.length + ' fois (' + g.map(x => x.date.slice(8, 10) + '/' + x.date.slice(5, 7) + ' ' + (x.statutLabel || '?')).join(', ') + ')' });
+      texte: 'Même client saisi ' + g.length + ' fois : ' + g.map(x => '« ' + x.name + ' » ' + x.date.slice(8, 10) + '/' + x.date.slice(5, 7) + ' ' + (x.statutLabel || '?')).join(', ') });
   });
   return out;
 }
@@ -314,15 +334,16 @@ function agencyView(list) {
     const v = JSON.parse(JSON.stringify(m)); delete v._deps; return v;
   });
   const anomalies = [].concat(...partners.map(p => p.anomalies));
-  // Doublons entre partenaires
-  const byName = {};
-  list.forEach(m => m._deps.forEach(d => { const k = norm(d.name); (byName[k] = byName[k] || []).push({ p: m.partner.name, d }); }));
-  Object.values(byName).forEach(g => {
-    const names = [...new Set(g.map(x => x.p))];
-    if (names.length > 1) anomalies.push({ type: 'croise', gravite: 3, partner: names.join(' + '), date: g[0].d.date, name: g[0].d.name,
-      broker: g.map(x => x.d.broker).join(' + '), montant: g.reduce((s, x) => s + x.d.commission, 0),
-      texte: 'Même client chez ' + names.join(' et ') });
-  });
+  // Même client chez deux partenaires
+  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+    list[i]._deps.forEach(a => list[j]._deps.forEach(b => {
+      if (!sameClient(a, b)) return;
+      anomalies.push({ type: 'croise', gravite: 3, partner: list[i].partner.name + ' + ' + list[j].partner.name, date: b.date > a.date ? b.date : a.date,
+        name: a.name, broker: a.broker + ' + ' + b.broker, montant: a.commission + b.commission,
+        texte: 'Même client chez ' + short(list[i].partner.name) + ' (' + a.broker + ', ' + a.date.slice(8, 10) + '/' + a.date.slice(5, 7) + ') et ' +
+          short(list[j].partner.name) + ' (' + b.broker + ', ' + b.date.slice(8, 10) + '/' + b.date.slice(5, 7) + ')' });
+    }));
+  }
   anomalies.sort((a, b) => b.gravite - a.gravite || (a.date < b.date ? 1 : -1));
   const sum = k => round(partners.reduce((s, p) => s + (p.mois[k] || 0), 0));
   const payoutMap = {};
