@@ -487,8 +487,11 @@ function renderFunnel(p) {
   let html = '';
   const tgAge = p.funnel.derniereSaisieTelegram ? daysAgo(p.funnel.derniereSaisieTelegram, p.today) : null;
   const lvAge = p.funnel.derniereSaisieLive ? daysAgo(p.funnel.derniereSaisieLive, p.today) : null;
-  if (lvAge === null || lvAge > 2) html += '<div class="warn"><span class="ic">●</span><div><b>Live Tracking ' + (lvAge === null ? 'jamais rempli' : 'pas rempli depuis ' + lvAge + ' jours') + '.</b> Sans les lives, on ne sait pas ce qui génère les dépôts.</div></div>';
-  if (tgAge === null || tgAge > 2) html += '<div class="warn soft"><span class="ic">●</span><div><b>Telegram ' + (tgAge === null ? 'jamais rempli' : 'pas rempli depuis ' + tgAge + ' jours') + '.</b> Les ajouts du canal manquent pour mesurer la conversion.</div></div>';
+  const src = p.sources || {};
+  if (src.live && /impossible|refus/.test(src.live)) html += '<div class="warn soft"><span class="ic">●</span><div><b>Live Tracking pas encore connecté.</b> Le fichier n\'est pas lisible par le dashboard : il le sera dès que le compte de service sera branché.</div></div>';
+  else if (lvAge === null || lvAge > 2) html += '<div class="warn"><span class="ic">●</span><div><b>Live Tracking ' + (lvAge === null ? 'jamais rempli' : 'pas rempli depuis ' + lvAge + ' jours') + '.</b> Sans les lives, on ne sait pas ce qui génère les dépôts.</div></div>';
+  if (src.telegram && /impossible|refus/.test(src.telegram)) html += '<div class="warn soft"><span class="ic">●</span><div><b>Telegram Tracking pas encore connecté.</b> Même raison : accès en attente du compte de service.</div></div>';
+  else if (tgAge === null || tgAge > 2) html += '<div class="warn soft"><span class="ic">●</span><div><b>Telegram ' + (tgAge === null ? 'jamais rempli' : 'pas rempli depuis ' + tgAge + ' jours') + '.</b> Les ajouts du canal manquent pour mesurer la conversion.</div></div>';
 
   html += '<div class="card"><div class="eyebrow">Du live au dépôt <span class="seg">' + [7, 14, 30].map(k => '<button data-fd="' + k + '" class="' + (N === k ? 'on' : '') + '">' + k + ' j</button>').join('') + '</span></div><div class="steps">' +
     step('Heures de live', heures.toFixed(1).replace('.', ',') + ' h', 1, lives + ' live(s) · ' + n0(viewers) + ' viewers · ' + n0(followers) + ' followers') +

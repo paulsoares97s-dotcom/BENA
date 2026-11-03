@@ -128,6 +128,9 @@ function sumIn(deps, a, b, statut) { return deps.filter(d => inRange(d.date, a, 
 function countIn(deps, a, b, statut) { return deps.filter(d => inRange(d.date, a, b) && d.statut === statut).length; }
 
 function monthEconomics(deps, params, month) {
+  if (params.activeFrom && month.end < params.activeFrom) {
+    return { ca: 0, frais: 0, fraisFixes: 0, fraisVariables: 0, benefice: 0, partner: 0, minimumApplique: false, agence: 0, inactif: true };
+  }
   const ca = sumIn(deps, month.start, month.end, 'debloquee');
   const annulees = sumIn(deps, month.start, month.end, 'annulee');
   const fraisFixes = params.fixes.reduce((s, f) => s + f.usd, 0);
@@ -199,10 +202,12 @@ async function partnerMetrics(p) {
     p.telegram ? readTabs(p.telegram, ['Saisie']).catch(e => ({ _err: String(e.message || e) })) : { _err: 'aucun fichier Telegram' },
     p.live ? readTabs(p.live, ['Saisie']).catch(e => ({ _err: String(e.message || e) })) : { _err: 'aucun fichier Live' }
   ]);
-  const sourceIssues = { telegram: tg._err || ((tg.Saisie || []).length ? null : 'onglet Saisie vide'), live: live._err || ((live.Saisie || []).length ? null : 'onglet Saisie vide'),
-    telegramRows: (tg.Saisie || []).length, liveRows: (live.Saisie || []).length, sample: (tg.Saisie || []).slice(180, 183) };
+  const sourceIssues = { telegram: tg._err || ((tg.Saisie || []).length ? null : 'onglet Saisie vide'), live: live._err || ((live.Saisie || []).length ? null : 'onglet Saisie vide') };
   const params = readParams(fin['Paramètres'] || []);
   const deps = readDeposits(fin);
+  // Le partenaire est actif à partir du mois de son premier dépôt (sinon : mois en cours).
+  const first = deps.length ? deps[deps.length - 1].date : todayIso();
+  params.activeFrom = first.slice(0, 8) + '01';
   const funnelTg = readTelegram(tg.Saisie);
   const funnelLive = readLives(live.Saisie);
 
