@@ -197,13 +197,15 @@ function groupClients(deps) {
 }
 
 // ---------- Anomalies d'un partenaire ----------
-function anomaliesFor(deps, today, partnerName) {
+// Seuls le cycle en cours et le cycle précédent comptent : avant, tout est déjà encaissé.
+function anomaliesFor(deps, today, partnerName, cutoff) {
   const out = [];
+  deps = deps.filter(d => d.date >= cutoff);
   deps.forEach(d => {
     if (d.statut === 'attente' && daysBetween(d.date, today) > 7)
       out.push({ type: 'attente', gravite: 2, partner: partnerName, date: d.date, name: d.name, broker: d.broker, montant: d.commission,
         texte: 'En attente depuis ' + daysBetween(d.date, today) + ' jours' });
-    if (d.statut && d.statutSetter && d.statut !== d.statutSetter)
+    if (d.statut && d.statutSetter && d.statut !== d.statutSetter && d.statut !== 'annulee')
       out.push({ type: 'conflit', gravite: 2, partner: partnerName, date: d.date, name: d.name, broker: d.broker, montant: d.commission,
         texte: d.statut === 'annulee' ? 'Annulée par la règle de retrait, mais Felana l’indique « ' + d.statutSetterLabel + ' »' : 'Statut « ' + d.statutLabel + ' », Felana indique « ' + d.statutSetterLabel + ' »' });
   });
@@ -273,6 +275,11 @@ async function partnerMetrics(p) {
   const payouts = historyQ.filter(x => x.payout >= today && (x.ca > 0 || x.attente > 0 || x.key === q.key))
     .map(x => ({ key: x.key, start: x.start, end: x.end, date: x.payout, montant: x.ca, attente: x.attente, enCours: x.end >= today }));
 
+  // Prochain encaissement : la dernière quinzaine terminée et pas encore payée (sinon la quinzaine en cours).
+  const pending = payouts.filter(x => !x.enCours);
+  const next = pending.length ? pending[0] : payouts[0] || null;
+  const cutoff = quinzaineOf(addDays(q.start, -1)).start;
+
   const days30 = dailySeries(deps, funnelTg, funnelLive, addDays(today, -29), today);
   const lastTg = Object.keys(funnelTg).sort().pop();
   const lastLive = Object.keys(funnelLive).sort().pop();
@@ -317,9 +324,11 @@ async function partnerMetrics(p) {
     },
     historique: { mois: historyMonths, quinzaines: historyQ },
     encaissements: payouts,
+    prochainEncaissement: next,
     depots: deps.slice(0, 200).map(d => ({ date: d.date, name: d.name, tg: d.tg, broker: d.broker, setter: d.setter,
       depot: d.depot, commission: d.commission, statut: d.statut, statutLabel: d.statutLabel })),
-    anomalies: anomaliesFor(raw, today, p.name),
+    anomalies: anomaliesFor(raw, today, p.name, cutoff),
+    cutoff,
     sources: sourceIssues,
     _deps: deps
   };
@@ -328,7 +337,7 @@ async function partnerMetrics(p) {
 // Version vue partenaire : sans marge agence ni détail des frais.
 function partnerView(m) {
   const out = JSON.parse(JSON.stringify(m));
-  delete out._deps;
+  delete out._deps; delete out.cutoff;
   delete out.mois.agence; delete out.mois.precedent.agence;
   out.historique.mois.forEach(x => { delete x.agence; });
   delete out.anomalies;
@@ -340,13 +349,13 @@ function partnerView(m) {
 function agencyView(list) {
   const today = todayIso();
   const partners = list.map(m => {
-    const v = JSON.parse(JSON.stringify(m)); delete v._deps; return v;
+    const v = JSON.parse(JSON.stringify(m)); delete v._deps; delete v.cutoff; return v;
   });
   const anomalies = [].concat(...partners.map(p => p.anomalies));
   // Même client chez deux partenaires
   for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
     list[i]._deps.forEach(a => list[j]._deps.forEach(b => {
-      if (!sameClient(a, b)) return;
+      if (!sameClient(a, b) || (a.date < list[i].cutoff && b.date < list[i].cutoff)) return;
       anomalies.push({ type: 'croise', gravite: 3, partner: list[i].partner.name + ' + ' + list[j].partner.name, date: b.date > a.date ? b.date : a.date,
         name: a.name, broker: a.broker + ' + ' + b.broker, montant: a.commission + b.commission,
         texte: 'Même client chez ' + short(list[i].partner.name) + ' (' + a.broker + ', ' + a.date.slice(8, 10) + '/' + a.date.slice(5, 7) + ') et ' +
@@ -375,6 +384,7 @@ function agencyView(list) {
       }
     },
     encaissements: Object.values(payoutMap).sort((a, b) => (a.date < b.date ? -1 : 1)),
+    prochainEncaissement: (() => { const all = Object.values(payoutMap).sort((a, b) => (a.date < b.date ? -1 : 1)); return all.find(x => !x.enCours) || all[0] || null; })(),
     anomalies,
     partners
   };

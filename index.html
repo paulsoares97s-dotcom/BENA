@@ -7,15 +7,19 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#07060A">
-<link rel="manifest" id="manifest-link" href="/api/manifest">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<title>Dashboard</title>
 <script>
+  // Manifest et icône posés AVANT tout chargement : l'écran d'accueil iPhone rouvre le bon espace avec le bon logo.
   (function () {
     var q = new URLSearchParams(location.search), s = '';
     if (q.get('admin')) s = '?admin=' + encodeURIComponent(q.get('admin'));
     else if (q.get('p')) s = '?p=' + encodeURIComponent(q.get('p'));
-    document.getElementById('manifest-link').href = '/api/manifest' + s;
+    try {
+      if (s) localStorage.setItem('bena_last', s);
+      else if (navigator.standalone || matchMedia('(display-mode: standalone)').matches) { var l = localStorage.getItem('bena_last'); if (l) { location.replace('/' + l); } }
+    } catch (e) {}
+    document.write('<link rel="manifest" href="/api/manifest' + s + '">' +
+      '<link rel="apple-touch-icon" sizes="180x180" href="/api/icon' + (s ? s + '&' : '?') + 's=180">' +
+      '<link rel="icon" type="image/png" href="/api/icon' + (s ? s + '&' : '?') + 's=192">');
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,6 +78,9 @@
 
   /* ===== En-tête ===== */
   .head { display: flex; align-items: center; justify-content: space-between; padding: 6px 22px 0; gap: 12px; }
+  .who { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .logo { width: 52px; height: 52px; border-radius: 14px; flex: none; object-fit: cover; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08); opacity: 0; transform: scale(.8); transition: opacity .6s, transform .8s var(--spring); }
+  .logo.on { opacity: 1; transform: none; }
   .hello { font-size: 14px; color: var(--t2); font-weight: 500; }
   .name { font-size: 34px; font-weight: 700; letter-spacing: -0.045em; line-height: 1.08; margin-top: 2px; background: linear-gradient(180deg, #fff 35%, #F3DFA8); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .round { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none; background: rgba(255, 255, 255, 0.07); box-shadow: inset 0 0 0 1px var(--hair); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: transform .3s var(--spring); }
@@ -120,6 +127,20 @@
   .chip { border-radius: 20px; padding: 14px 12px; text-align: center; background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.05); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
   .chip b { display: block; font-size: 19px; font-weight: 600; letter-spacing: -0.04em; white-space: nowrap; }
   .chip span { display: block; font-size: 11.5px; color: var(--t2); margin-top: 4px; line-height: 1.3; }
+
+  /* ===== Prochain encaissement ===== */
+  .pay { margin: 14px 16px 0; border-radius: 26px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; position: relative; overflow: hidden;
+    background: radial-gradient(120% 140% at 0% 50%, rgba(61, 220, 151, 0.18), transparent 55%), linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), inset 0 0 0 1px rgba(61, 220, 151, 0.22), 0 20px 50px -24px rgba(61, 220, 151, 0.35); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
+  .pay-d { width: 58px; height: 62px; border-radius: 16px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(61, 220, 151, 0.14); box-shadow: inset 0 0 0 1px rgba(61, 220, 151, 0.3); }
+  .pay-d b { font-size: 24px; font-weight: 700; letter-spacing: -0.04em; color: #9FF5CF; line-height: 1; }
+  .pay-d span { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(159, 245, 207, 0.75); margin-top: 4px; font-weight: 600; }
+  .pay-m { flex: 1; min-width: 0; }
+  .pay-l { font-size: 12.5px; color: var(--t2); font-weight: 500; }
+  .pay-v { font-size: 30px; font-weight: 600; letter-spacing: -0.05em; margin-top: 3px; color: #fff; display: flex; align-items: flex-start; }
+  .pay-v .c { font-size: 0.48em; opacity: .6; margin: 0.12em 0 0 2px; }
+  .pay-s { font-size: 12px; color: var(--t3); margin-top: 3px; }
+  .pay-in { font-size: 12px; font-weight: 600; color: #9FF5CF; background: rgba(61, 220, 151, 0.12); padding: 6px 10px; border-radius: 100px; flex: none; align-self: flex-start; }
 
   /* ===== Sections & cartes ===== */
   .sec { padding: 0 16px; margin-top: 16px; }
@@ -296,7 +317,7 @@
 
 <div class="app">
   <header class="head">
-    <div><div class="hello" id="hello">&nbsp;</div><div class="name" id="name">&nbsp;</div></div>
+    <div class="who"><img class="logo" id="logo" alt=""><div><div class="hello" id="hello">&nbsp;</div><div class="name" id="name">&nbsp;</div></div></div>
     <button class="round" id="refresh" aria-label="Actualiser" onclick="load()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
   </header>
   <div class="tabs" id="tabs" hidden></div>
@@ -527,9 +548,12 @@ function header() {
   const ag = isAgency(), onAg = ag && S.page === 'agence', p = cur();
   const nm = onAg ? 'Incubeo' : short(p.partner.name);
   const h = new Date().getHours();
-  document.getElementById('hello').textContent = onAg ? 'Espace agence · ' + cap(dL(S.data.today)) : (h < 18 ? 'Bonjour' : 'Bonsoir') + ' · ' + cap(dL(S.data.today));
+  document.getElementById('hello').textContent = onAg ? 'Espace agence' : (h < 18 ? 'Bonjour' : 'Bonsoir') + ' · ' + cap(dL(S.data.today)).replace(/ \d{4}$/, '');
   document.getElementById('name').textContent = nm;
   document.title = nm + ' — Dashboard';
+  const lg = document.getElementById('logo'), slug = onAg ? 'incubeo' : (['lenny', 'romane', 'mohamed'].includes(p.partner.slug) ? p.partner.slug : 'lenny');
+  const src = '/icons/' + slug + '-192.png';
+  if (lg.getAttribute('src') !== src) { lg.classList.remove('on'); lg.onload = () => lg.classList.add('on'); lg.src = src; }
   const q = onAg ? (S.data.total.quinzaine || {}) : p.quinzaine;
   document.getElementById('compact').innerHTML = esc(nm) + ' <span class="v">' + money(q.ca) + '</span>';
   const st = document.getElementById('stale'); st.hidden = !S.stale;
@@ -543,6 +567,14 @@ function header() {
 }
 
 // ---------- Anneau héro ----------
+function payHTML(key, e, today) {
+  if (!e) return '';
+  const g = gap(today, e.date), [, mo, dd] = P(e.date);
+  return '<div class="pay rv"><div class="pay-d"><b>' + dd + '</b><span>' + MC[mo - 1].replace('.', '') + '</span></div>' +
+    '<div class="pay-m"><div class="pay-l">Prochain encaissement</div><div class="pay-v">' + odoHTML(key + 'pay', e.montant, '<span class="c">$</span>') + '</div>' +
+    '<div class="pay-s">CA débloqué du ' + dS(e.start) + ' au ' + dS(e.end) + (e.enCours ? ' · à date' : '') + '</div></div>' +
+    '<div class="pay-in">' + (g <= 0 ? 'aujourd\'hui' : g === 1 ? 'demain' : 'dans ' + g + ' j') + '</div></div>';
+}
 function ringHTML(key, q, label) {
   const R = 132, C = 2 * Math.PI * R, prog = Math.min(1, q.ca / (q.objectif || 1)), exp = Math.min(1, q.ecoules / q.jours);
   const ta = exp * 2 * Math.PI, cx = 150 + Math.cos(ta) * R, cy = 150 + Math.sin(ta) * R;
@@ -603,6 +635,7 @@ function home(p) {
     '<div class="chip"><b data-count="' + j.ca + '" data-key="' + k + 'j">0 $</b><span>aujourd\'hui</span></div>' +
     '<div class="chip"><b data-count="' + q.projection + '" data-key="' + k + 'pr">0 $</b><span>projection quinzaine</span></div>' +
     '<div class="chip"><b data-count="' + q.rythmeNecessaire + '" data-key="' + k + 'rn">0 $</b><span>' + (q.ca >= q.objectif ? 'objectif atteint' : 'par jour pour l\'objectif') + '</span></div></div>';
+  h += payHTML(k, p.prochainEncaissement, S.data.today);
 
   h += '<div class="sh rv"><h2>Évolution</h2><span>' + dS(q.start) + ' – ' + dS(q.end) + '</span></div>';
   h += '<div class="sec rv" id="cq"><div class="glass">' + curveHTML() + '</div></div>';
@@ -777,7 +810,8 @@ function agency() {
     h += ringHTML('ag', S._aq, 'Quinzaine · agence');
     h += '<div class="strip rv"><div class="chip"><b data-count="' + t.caJour + '" data-key="agj">0 $</b><span>aujourd\'hui</span></div>' +
       '<div class="chip"><b data-count="' + S._aq.projection + '" data-key="agp">0 $</b><span>projection</span></div>' +
-      '<div class="chip"><b class="goldt">' + dS(q0.encaissement) + '</b><span>encaissement</span></div></div>';
+      '<div class="chip"><b data-count="' + t.agence + '" data-key="aga">0 $</b><span>marge du mois</span></div></div>';
+    h += payHTML('ag', d.prochainEncaissement, d.today);
   }
   h += '<div class="sh rv"><h2>Partenaires</h2><span>quinzaine</span></div><div class="carousel rv">' + d.partners.map((p, i) => {
     const q = p.quinzaine;
