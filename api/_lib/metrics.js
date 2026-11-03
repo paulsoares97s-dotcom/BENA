@@ -176,12 +176,30 @@ function dailySeries(deps, funnelTg, funnelLive, start, end) {
 }
 
 // ---------- Même client ? ----------
-// Deux lignes = même client si leurs noms partagent au moins 2 mots (ordre et casse ignorés,
-// fautes de frappe d'un mot tolérées) ou si le pseudo Telegram, assez long pour être distinctif, est identique.
+// Deux lignes = même client si TOUS les mots du nom le plus court se retrouvent dans l'autre
+// (ordre et casse ignorés, une faute de frappe d'une lettre tolérée par mot, au moins 2 mots),
+// ou si le pseudo Telegram, assez long pour être distinctif, est identique.
+// Un simple prénom composé commun (« Jean Luc ») ne suffit donc plus.
 const tokens = s => norm(s).replace(/[^a-z0-9 ]/g, ' ').split(' ').filter(w => w.length >= 3);
+function near(a, b) {
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 1 || Math.min(a.length, b.length) < 3) return false;
+  let i = 0, j = 0, diff = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i++; j++; continue; }
+    if (++diff > 1) return false;
+    if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; }
+  }
+  return diff + (a.length - i) + (b.length - j) <= 1;
+}
 function sameClient(a, b) {
-  const ta = tokens(a.name), tb = new Set(tokens(b.name));
-  if (ta.filter(w => tb.has(w)).length >= 2) return true;
+  let ta = tokens(a.name), tb = tokens(b.name);
+  if (ta.length > tb.length) [ta, tb] = [tb, ta];
+  if (ta.length >= 2) {
+    const pool = tb.slice();
+    const all = ta.every(w => { const k = pool.findIndex(x => near(w, x)); if (k < 0) return false; pool.splice(k, 1); return true; });
+    if (all) return true;
+  }
   const ga = norm(a.tg).replace(/\s+/g, ''), gb = norm(b.tg).replace(/\s+/g, '');
   return ga.length >= 10 && ga === gb;
 }
