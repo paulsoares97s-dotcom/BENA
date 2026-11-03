@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8');
   res.setHeader('Cache-Control', 'private, max-age=300');
   res.end(JSON.stringify({
-    name: name + ' — Dashboard', short_name: name, start_url: start, scope: '/', id: start,
+    name: name + ' — Dashboard', short_name: name.replace(/\s*\(.*\)\s*/, '').trim(), start_url: start, scope: '/', id: start,
     display: 'standalone', orientation: 'portrait', background_color: '#000000', theme_color: '#000000',
     icons: [
       { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
