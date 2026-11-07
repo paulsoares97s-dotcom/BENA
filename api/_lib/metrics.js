@@ -128,7 +128,42 @@ const round = n => Math.round(n * 100) / 100;
 function sumIn(deps, a, b, statut) { return deps.filter(d => inRange(d.date, a, b) && (!statut || d.statut === statut)).reduce((s, d) => s + d.commission, 0); }
 function countIn(deps, a, b, statut) { return deps.filter(d => inRange(d.date, a, b) && d.statut === statut).length; }
 
+// Compta réelle (fichier COMPTA, importé dans l'onglet « Compta » de chaque fichier Finance) :
+// une ligne par mois avec CA attendu / reçu / retenu, frais réels détaillés et part du partenaire.
+function readCompta(rows) {
+  const out = {};
+  (rows || []).forEach(r => {
+    const d = r && asDate(r[0]);
+    if (!d) return;
+    out[d.slice(0, 7)] = {
+      caAttendu: asNumber(r[4]), caRecu: asNumber(r[5]), manquants: asNumber(r[6]), caRetenu: asNumber(r[7]),
+      commissionsSetters: asNumber(r[8]), fixesSetters: asNumber(r[9]), depensesDirectes: asNumber(r[10]),
+      depensesCommunes: asNumber(r[11]), frais: asNumber(r[12]), pct: asNumber(r[14]), statut: asText(r[17])
+    };
+  });
+  return out;
+}
+
 function monthEconomics(deps, params, month) {
+  const c = params.compta && params.compta[month.key];
+  if (c) {
+    const ca = sumIn(deps, month.start, month.end, 'debloquee');
+    // Écart réel / attendu (paiements broker saisis) appliqué au CA de l'app.
+    const caRetenu = ca + (c.caRetenu - c.caAttendu);
+    const benefice = caRetenu - c.frais;
+    const pct = c.pct || params.pctPartner;
+    const partPct = Math.max(0, benefice) * pct;
+    const partner = Math.max(params.minMensuel, partPct);
+    return {
+      ca: round(ca), caRecu: round(c.caRecu), caRetenu: round(caRetenu), ecart: round(c.caRetenu - c.caAttendu),
+      paiementsManquants: c.manquants, statutCompta: c.statut, pct,
+      frais: round(c.frais), fraisFixes: round(c.fixesSetters + c.depensesDirectes + c.depensesCommunes), fraisVariables: round(c.commissionsSetters),
+      fraisDetail: { commissionsSetters: round(c.commissionsSetters), fixesSetters: round(c.fixesSetters),
+        depensesDirectes: round(c.depensesDirectes), depensesCommunes: round(c.depensesCommunes) },
+      benefice: round(benefice), partner: round(partner), minimumApplique: partner > partPct,
+      agence: round(benefice - partner), compta: true
+    };
+  }
   if (params.activeFrom && month.end < params.activeFrom) {
     return { ca: 0, frais: 0, fraisFixes: 0, fraisVariables: 0, benefice: 0, partner: 0, minimumApplique: false, agence: 0, inactif: true };
   }
@@ -239,12 +274,13 @@ function anomaliesFor(deps, today, partnerName, cutoff) {
 async function partnerMetrics(p) {
   const today = todayIso();
   const [fin, tg, live] = await Promise.all([
-    readTabs(p.finance, ['Paramètres', ...BROKERS]),
+    readTabs(p.finance, ['Paramètres', ...BROKERS, 'Compta']),
     p.telegram ? readTabs(p.telegram, ['Saisie']).catch(e => ({ _err: String(e.message || e) })) : { _err: 'aucun fichier Telegram' },
     p.live ? readTabs(p.live, ['Saisie']).catch(e => ({ _err: String(e.message || e) })) : { _err: 'aucun fichier Live' }
   ]);
   const sourceIssues = { telegram: tg._err || ((tg.Saisie || []).length ? null : 'onglet Saisie vide'), live: live._err || ((live.Saisie || []).length ? null : 'onglet Saisie vide') };
   const params = readParams(fin['Paramètres'] || []);
+  params.compta = readCompta(fin['Compta']);
   const raw = readDeposits(fin);
   // Un client ne compte qu'une fois : en cas de doublon, on garde la ligne au meilleur statut.
   const rank = { debloquee: 3, attente: 2, annulee: 1 };
@@ -357,7 +393,9 @@ function partnerView(m) {
   const out = JSON.parse(JSON.stringify(m));
   delete out._deps; delete out.cutoff;
   delete out.mois.agence; delete out.mois.precedent.agence;
-  out.historique.mois.forEach(x => { delete x.agence; });
+  delete out.mois.fraisDetail; delete out.mois.precedent.fraisDetail;
+  out.historique.mois.forEach(x => { delete x.agence; delete x.fraisDetail; });
+  delete out.params.fixes; delete out.params.variables;
   delete out.anomalies;
   delete out.encaissements;
   return out;

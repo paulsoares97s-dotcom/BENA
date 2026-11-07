@@ -694,14 +694,21 @@ function month(p) {
   const m = p.mois, ag = isAgency(), pv = m.precedent, who = esc(short(p.partner.name)), k = 'm' + (ag ? S.pi : '');
   const ev = pv.ca ? (m.projection - pv.ca) / pv.ca * 100 : null;
   let h = '<div class="sec rv" style="margin-top:22px"><div class="gold"><div class="shine"></div>' +
-    '<div class="lbl"><span>Part ' + who + '</span><span class="pill g">' + Math.round(p.params.pctPartner * 100) + ' % du bénéfice</span></div>' +
+    '<div class="lbl"><span>Part ' + who + '</span><span class="pill g">' + Math.round((m.pct || p.params.pctPartner) * 100) + ' % du bénéfice</span></div>' +
     '<div class="amt" style="font-size:60px">' + odoHTML(k + 'part', m.partner, '<span class="c">$</span>') + '</div>' +
-    '<div class="sub">' + cap(mName(m.key)) + ' à date</div>' +
+    '<div class="sub">' + cap(mName(m.key)) + (m.compta && m.statutCompta === 'Définitif' ? ' · définitif' : m.compta && m.statutCompta === 'Provisoire' ? ' · provisoire' : ' à date') + '</div>' +
     '<div class="foot3"><div>CA du mois<b>' + money(m.ca) + '</b></div><div>Bénéfice net<b>' + money(m.benefice) + '</b></div></div></div></div>';
 
   h += '<div class="sh rv"><h2>Calcul</h2></div><div class="sec rv"><div class="glass" style="padding-top:8px;padding-bottom:8px">' +
-    srow('CA débloqué', money(m.ca)) + srow('Frais du mois', '− ' + money(m.frais)) +
-    (ag ? '<div class="stmt-sub">' + p.params.fixes.map(f => esc(f.label) + ' ' + n0(f.eur) + ' €').concat(p.params.variables.map(v => esc(v.label) + ' : ' + money(m.fraisVariables))).join(' · ') + '</div>' : '') +
+    srow(m.compta ? 'CA débloqué (attendu)' : 'CA débloqué', money(m.ca)) +
+    (m.compta ? srow('Encaissé auprès des brokers', money(m.caRecu)) +
+      (m.paiementsManquants ? '<div class="stmt-sub">' + m.paiementsManquants + ' paiement' + (m.paiementsManquants > 1 ? 's' : '') + ' broker pas encore reçu' + (m.paiementsManquants > 1 ? 's' : '') + ' : le montant attendu est utilisé en attendant</div>' : '') +
+      (Math.abs(m.ecart || 0) >= 1 ? srow('Écart réel / attendu', (m.ecart > 0 ? '+ ' : '− ') + money(Math.abs(m.ecart))) : '') +
+      srow('CA retenu', money(m.caRetenu)) : '') +
+    srow('Frais du mois', '− ' + money(m.frais)) +
+    (ag && m.fraisDetail ? '<div class="stmt-sub">Commissions setters ' + money(m.fraisDetail.commissionsSetters) + ' · Fixes setters ' + money(m.fraisDetail.fixesSetters) +
+      ' · Dépenses ' + money(m.fraisDetail.depensesDirectes) + ' · Communes ' + money(m.fraisDetail.depensesCommunes) + '</div>' :
+      ag && p.params.fixes ? '<div class="stmt-sub">' + p.params.fixes.map(f => esc(f.label) + ' ' + n0(f.eur) + ' €').concat(p.params.variables.map(v => esc(v.label) + ' : ' + money(m.fraisVariables))).join(' · ') + '</div>' : '') +
     srow('Bénéfice net', money(m.benefice)) + srow('Part ' + who, '<span class="goldt">' + money(m.partner) + '</span>') + (ag ? srow('Marge agence', money(m.agence)) : '') + '</div></div>';
 
   h += '<div class="sh rv"><h2>Jour par jour</h2><span>' + cap(mName(m.key)) + '</span></div><div class="sec rv"><div class="glass"><div class="readline" data-ro></div><div class="bars" data-bars></div></div></div>';
