@@ -135,10 +135,16 @@ function readCompta(rows) {
   (rows || []).forEach(r => {
     const d = r && asDate(r[0]);
     if (!d) return;
+    // Colonnes COMPTA : A mois, B partenaire, C/D attendu/reçu 1–15, E/F attendu/reçu 16–fin, G attendu, H reçu,
+    // I retenu, J écart, K commissions, L fixes, M dép. directes, N dép. communes, O frais, P bénéfice, Q %, R part,
+    // S agence, T versé, U versé le, V reste, W statut.
+    const blank = v => v === undefined || v === null || String(v).trim() === '';
+    const manquants = (asNumber(r[2]) > 0 && blank(r[3]) ? 1 : 0) + (asNumber(r[4]) > 0 && blank(r[5]) ? 1 : 0);
     out[d.slice(0, 7)] = {
-      caAttendu: asNumber(r[4]), caRecu: asNumber(r[5]), manquants: asNumber(r[6]), caRetenu: asNumber(r[7]),
-      commissionsSetters: asNumber(r[8]), fixesSetters: asNumber(r[9]), depensesDirectes: asNumber(r[10]),
-      depensesCommunes: asNumber(r[11]), frais: asNumber(r[12]), pct: asNumber(r[14]), statut: asText(r[17])
+      caAttendu: asNumber(r[6]), caRecu: asNumber(r[7]), manquants, caRetenu: asNumber(r[8]),
+      commissionsSetters: asNumber(r[10]), fixesSetters: asNumber(r[11]), depensesDirectes: asNumber(r[12]),
+      depensesCommunes: asNumber(r[13]), frais: asNumber(r[14]), pct: asNumber(r[16]),
+      verse: asNumber(r[19]), statut: asText(r[22])
     };
   });
   return out;

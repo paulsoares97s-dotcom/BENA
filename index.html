@@ -696,7 +696,7 @@ function month(p) {
   let h = '<div class="sec rv" style="margin-top:22px"><div class="gold"><div class="shine"></div>' +
     '<div class="lbl"><span>Part ' + who + '</span><span class="pill g">' + Math.round((m.pct || p.params.pctPartner) * 100) + ' % du bénéfice</span></div>' +
     '<div class="amt" style="font-size:60px">' + odoHTML(k + 'part', m.partner, '<span class="c">$</span>') + '</div>' +
-    '<div class="sub">' + cap(mName(m.key)) + (m.compta && m.statutCompta === 'Définitif' ? ' · définitif' : m.compta && m.statutCompta === 'Provisoire' ? ' · provisoire' : ' à date') + '</div>' +
+    '<div class="sub">' + cap(mName(m.key)) + (m.compta && /^Définitif/.test(m.statutCompta || '') ? ' · définitif' : m.compta && /^(Provisoire|En retard)/.test(m.statutCompta || '') ? ' · provisoire' : ' à date') + '</div>' +
     '<div class="foot3"><div>CA du mois<b>' + money(m.ca) + '</b></div><div>Bénéfice net<b>' + money(m.benefice) + '</b></div></div></div></div>';
 
   h += '<div class="sh rv"><h2>Calcul</h2></div><div class="sec rv"><div class="glass" style="padding-top:8px;padding-bottom:8px">' +
