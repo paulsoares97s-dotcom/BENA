@@ -128,23 +128,21 @@ const round = n => Math.round(n * 100) / 100;
 function sumIn(deps, a, b, statut) { return deps.filter(d => inRange(d.date, a, b) && (!statut || d.statut === statut)).reduce((s, d) => s + d.commission, 0); }
 function countIn(deps, a, b, statut) { return deps.filter(d => inRange(d.date, a, b) && d.statut === statut).length; }
 
-// Compta réelle (fichier COMPTA, importé dans l'onglet « Compta » de chaque fichier Finance) :
-// une ligne par mois avec CA attendu / reçu / retenu, frais réels détaillés et part du partenaire.
+// Compta réelle (fichier COMPTA, importé dans l'onglet « Compta » de chaque fichier Finance).
+// Modèle : à chaque paiement broker, on retire la mise en trésorerie puis on partage le reste
+// (% partenaire, sans minimum). Les frais sont payés par la trésorerie : ils ne touchent pas au partage.
 function readCompta(rows) {
   const out = {};
   (rows || []).forEach(r => {
     const d = r && asDate(r[0]);
     if (!d) return;
-    // Colonnes COMPTA : A mois, B partenaire, C/D attendu/reçu 1–15, E/F attendu/reçu 16–fin, G attendu, H reçu,
-    // I retenu, J écart, K commissions, L fixes, M dép. directes, N dép. communes, O frais, P bénéfice, Q %, R part,
-    // S agence, T versé, U versé le, V reste, W statut.
-    const blank = v => v === undefined || v === null || String(v).trim() === '';
-    const manquants = (asNumber(r[2]) > 0 && blank(r[3]) ? 1 : 0) + (asNumber(r[4]) > 0 && blank(r[5]) ? 1 : 0);
+    // Colonnes COMPTA (bilan) : A mois, B partenaire, C CPA attendu, D reçu, E mis en trésorerie, F part partenaire,
+    // G part agence, H Paul, I Matthéo, J attendu pas encore reçu, K part partenaire estimée, L %, M versé,
+    // N reste à verser, O statut.
     out[d.slice(0, 7)] = {
-      caAttendu: asNumber(r[6]), caRecu: asNumber(r[7]), manquants, caRetenu: asNumber(r[8]),
-      commissionsSetters: asNumber(r[10]), fixesSetters: asNumber(r[11]), depensesDirectes: asNumber(r[12]),
-      depensesCommunes: asNumber(r[13]), frais: asNumber(r[14]), pct: asNumber(r[16]),
-      verse: asNumber(r[19]), statut: asText(r[22])
+      caAttendu: asNumber(r[2]), caRecu: asNumber(r[3]), tresorerie: asNumber(r[4]), part: asNumber(r[5]),
+      attenduNonRecu: asNumber(r[9]), partEstimee: asNumber(r[10]), pct: asNumber(r[11]),
+      verse: asNumber(r[12]), reste: asNumber(r[13]), statut: asText(r[14])
     };
   });
   return out;
@@ -153,20 +151,14 @@ function readCompta(rows) {
 function monthEconomics(deps, params, month) {
   const c = params.compta && params.compta[month.key];
   if (c) {
-    const ca = sumIn(deps, month.start, month.end, 'debloquee');
-    // Écart réel / attendu (paiements broker saisis) appliqué au CA de l'app.
-    const caRetenu = ca + (c.caRetenu - c.caAttendu);
-    const benefice = caRetenu - c.frais;
     const pct = c.pct || params.pctPartner;
-    const partPct = Math.max(0, benefice) * pct;
-    const partner = Math.max(params.minMensuel, partPct);
+    const benefice = c.caRecu - c.tresorerie + c.attenduNonRecu; // base partagée (reçu net + attendu en estimation)
+    const partner = c.partEstimee;
     return {
-      ca: round(ca), caRecu: round(c.caRecu), caRetenu: round(caRetenu), ecart: round(c.caRetenu - c.caAttendu),
-      paiementsManquants: c.manquants, statutCompta: c.statut, pct,
-      frais: round(c.frais), fraisFixes: round(c.fixesSetters + c.depensesDirectes + c.depensesCommunes), fraisVariables: round(c.commissionsSetters),
-      fraisDetail: { commissionsSetters: round(c.commissionsSetters), fixesSetters: round(c.fixesSetters),
-        depensesDirectes: round(c.depensesDirectes), depensesCommunes: round(c.depensesCommunes) },
-      benefice: round(benefice), partner: round(partner), minimumApplique: partner > partPct,
+      ca: round(c.caAttendu), caRecu: round(c.caRecu), tresorerie: round(c.tresorerie), attenduNonRecu: round(c.attenduNonRecu),
+      statutCompta: c.statut, pct, verse: round(c.verse), reste: round(c.reste),
+      frais: round(c.tresorerie), fraisFixes: round(c.tresorerie), fraisVariables: 0,
+      benefice: round(benefice), partner: round(partner), minimumApplique: false,
       agence: round(benefice - partner), compta: true
     };
   }
